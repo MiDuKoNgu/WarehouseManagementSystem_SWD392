@@ -32,10 +32,10 @@ Chủ dự án đã xác nhận trong phiên làm việc ngày 01/11/2026. Inven
 | Khóa cấu hình | Giá trị và tác dụng |
 |---|---|
 | `Inbound:AllowMultipleDrafts` | `false`: một phiếu DRAFT đang mở cho mỗi PO |
-| `Inbound:AcceptDamaged` | `true`: nhận hàng hỏng nhẹ/móp méo vào cách ly |
+| `Inbound:AcceptDamaged` | `true`: nhận hàng hỏng vào cách ly |
 | `Inbound:AllowCancellation` | `true`: nhân viên được hủy toàn bộ DRAFT, bắt buộc lý do |
 
-Biến môi trường tương ứng là `Inbound__AllowMultipleDrafts`, `Inbound__AcceptDamaged`, `Inbound__AllowCancellation`. Giá trị tổng thể là `false,true,true`. Hàng hỏng nặng bị từ chối tiếp nhận; lựa chọn hỏng nặng trên form không lưu Serial. Hàng hỏng nhẹ/móp méo được nhận với mã `DAMAGED`, bắt buộc mô tả tình trạng; Serial bị cách ly và nguồn hàng có `EligibleQuantity=0`. Nhân viên đánh giá mức độ khi kiểm tra hàng; schema không thêm trường mức độ riêng. Backend chỉ chấp nhận `GOOD` hoặc `DAMAGED` theo nghĩa đã chốt, từ chối enum khác. Hủy hiệu lực một Serial nhập sai trong DRAFT luôn được phép; quyền này khác hủy toàn phiếu.
+Biến môi trường tương ứng là `Inbound__AllowMultipleDrafts`, `Inbound__AcceptDamaged`, `Inbound__AllowCancellation`. Giá trị tổng thể là `false,true,true`. Luồng nhập hàng chỉ có hai tình trạng `GOOD` và `DAMAGED`, không phân mức độ hỏng. Hàng hỏng được nhận với mã `DAMAGED`, bắt buộc mô tả tình trạng; Serial bị cách ly và nguồn hàng có `EligibleQuantity=0`. Backend chỉ chấp nhận `GOOD` hoặc `DAMAGED`, từ chối enum khác. Hủy hiệu lực một Serial nhập sai trong DRAFT luôn được phép; quyền này khác hủy toàn phiếu.
 
 ## API
 

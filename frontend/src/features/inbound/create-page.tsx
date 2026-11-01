@@ -1,0 +1,16 @@
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { inboundApi } from './api';
+import type { ReceiptOrder, ReceiptPolicy, ReceiptProgress } from './types';
+import { ErrorNotice, InboundLayout, message } from './layout';
+import { Progress } from './progress';
+export function CreateInboundPage() {
+  const navigate = useNavigate(); const [orders, setOrders] = useState<ReceiptOrder[]>([]); const [id, setId] = useState(''); const [preview, setPreview] = useState<{ order: ReceiptOrder; lines: ReceiptProgress[]; policy: ReceiptPolicy } | null>(null);
+  const [loading, setLoading] = useState(true); const [busy, setBusy] = useState(false); const [error, setError] = useState(''); const [note, setNote] = useState(''); const [attempt, setAttempt] = useState(0);
+  useEffect(() => { let active = true; setLoading(true); setError(''); inboundApi.orders().then(data => { if (active) setOrders(data); }).catch(e => { if (active) setError(message(e)); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [attempt]);
+  useEffect(() => { let active = true; setPreview(null); if (!id) return; setError(''); inboundApi.order(Number(id)).then(data => { if (active) setPreview(data); }).catch(e => { if (active) setError(message(e)); }); return () => { active = false; }; }, [id]);
+  async function submit(e: FormEvent) { e.preventDefault(); if (!preview || busy) return; setBusy(true); setError(''); try { const result = await inboundApi.create(preview.order.purchaseOrderId, note); navigate(`/warehouse/inbounds/${result.receipt.inboundId}`); } catch (e) { setError(message(e)); } finally { setBusy(false); } }
+  return <InboundLayout><Link className="po-back-link" to="/warehouse/inbounds">← Phiếu nhập kho</Link><div className="po-heading"><div><h1>Tạo phiếu nhập</h1><p>Chọn PO đã xác nhận, còn số lượng được tiếp nhận trong kho của bạn.</p></div></div><ErrorNotice error={error} retry={() => setAttempt(a => a + 1)} />
+    <form onSubmit={e => void submit(e)}><fieldset className="po-fieldset" disabled={busy || loading}><section className="po-card po-form-section"><h2>Đơn mua hàng</h2><div className="po-form-grid"><label>Purchase Order<select required value={id} onChange={e => setId(e.target.value)}><option value="">{loading ? 'Đang tải…' : 'Chọn PO'}</option>{orders.map(o => <option key={o.purchaseOrderId} value={o.purchaseOrderId}>{o.poCode} · {o.supplierName}</option>)}</select></label><label>Ghi chú<textarea maxLength={1000} value={note} onChange={e => setNote(e.target.value)} /></label></div>{!loading && !orders.length && <p className="po-helper">Chưa có PO đủ điều kiện. PO cần được xác nhận, thuộc kho của bạn và còn số lượng nhận.</p>}{preview && <p className="po-helper">{preview.order.supplierName} → {preview.order.warehouseName}</p>}</section>{preview && <Progress lines={preview.lines} />}<div className="po-submit-bar"><p>Phiếu mới ở trạng thái DRAFT. Chỉ khi hoàn tất, serial mới được ghi nhận chính thức.</p><button className="po-primary-button" disabled={!preview || busy}>{busy ? 'Đang tạo…' : 'Tạo phiếu và tiếp nhận →'}</button></div></fieldset></form>
+  </InboundLayout>;
+}

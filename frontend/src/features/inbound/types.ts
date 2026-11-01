@@ -1,0 +1,9 @@
+export type ReceiptPolicy = { allowMultipleDrafts: boolean; acceptDamaged: boolean; allowCancellation: boolean };
+export type ReceiptOrderLine = { poLineId: number; productId: number; productCode: string; productName: string; orderedQuantity: number; closedQuantity: number };
+export type ReceiptOrder = { purchaseOrderId: number; poCode: string; supplierId: number; supplierName: string; warehouseId: number; warehouseName: string; status: string; lines: ReceiptOrderLine[] };
+export type ReceiptHeader = { inboundId: number; purchaseOrderId: number; receiptCode: string; status: string; receiptDate: string; createdAt: string; createdByUserId: number; createdByName: string | null; completedAt: string | null; performedByUserId: number | null; performedByName: string | null; note: string | null; rowVersion: string; warehouseId: number; serialCount: number };
+export type ReceiptItem = { inboundItemId: number; poLineId: number; scannedSerial: string; manufacturingMonth: number | null; manufacturingYear: number | null; receivedCondition: string | null; conditionNote: string | null; inputMethod: string; scannedByUserId: number | null; scannedByName: string | null; scannedAt: string; serialItemId: number | null };
+export type ReceiptProgress = ReceiptOrderLine & { receivedQuantity: number; reservedQuantity: number; currentQuantity: number; remainingQuantity: number };
+export type ReceiptDetail = { receipt: ReceiptHeader; order: ReceiptOrder; lines: ReceiptProgress[]; items: ReceiptItem[]; policy: ReceiptPolicy };
+export type ReceiptListItem = { receipt: ReceiptHeader; poCode: string; supplierName: string; warehouseName: string; expectedQuantity: number };
+export type SaveReceiptItem = { poLineId: number; serial: string; manufacturingMonth: number; manufacturingYear: number; receivedCondition: string; conditionNote: string; inputMethod: string; rowVersion: string };

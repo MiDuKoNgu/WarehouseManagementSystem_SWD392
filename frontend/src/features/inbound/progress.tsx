@@ -1,0 +1,4 @@
+import type { ReceiptProgress } from './types';
+export function Progress({ lines }: { lines: ReceiptProgress[] }) {
+  return <section className="inbound-section"><h2>Tiến độ đơn mua</h2><div className="inbound-progress">{lines.map(l => <article className="po-card" key={l.poLineId}><h3>{l.productName}</h3><p className="po-muted">{l.productCode}</p><dl><div><dt>Đặt mua</dt><dd>{l.orderedQuantity}</dd></div><div><dt>Đã nhận chính thức</dt><dd>{l.receivedQuantity}</dd></div><div><dt>Trong phiếu này</dt><dd>{l.currentQuantity}</dd></div><div><dt>Giữ chỗ DRAFT khác</dt><dd>{l.reservedQuantity}</dd></div><div><dt>Đóng thiếu</dt><dd>{l.closedQuantity}</dd></div><div><dt>Còn được nhận</dt><dd>{l.remainingQuantity}</dd></div></dl><progress max={l.orderedQuantity} value={l.receivedQuantity} aria-label={`Tiến độ ${l.productCode}`} /></article>)}</div></section>;
+}

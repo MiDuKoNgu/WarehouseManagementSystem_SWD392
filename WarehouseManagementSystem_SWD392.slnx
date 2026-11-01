@@ -1,0 +1,199 @@
+<Solution>
+  <Folder Name="/Backend/" />
+  <Folder Name="/Backend/APIService/">
+    <Project Path="WMS.API/WMS.API.csproj" />
+  </Folder>
+  <Folder Name="/Backend/BusinessServices/" />
+  <Folder Name="/Backend/BusinessServices/CatalogService/">
+    <Project Path="Catalog.API/Catalog.API.csproj" />
+    <Project Path="Catalog.BLL/Catalog.BLL.csproj" />
+    <Project Path="Catalog.DAL/Catalog.DAL.csproj" />
+    <Project Path="Catalog.Models/Catalog.Models.csproj" />
+  </Folder>
+  <Folder Name="/Backend/BusinessServices/IdentityService/">
+    <Project Path="Identity.API/Identity.API.csproj" />
+    <Project Path="Identity.BLL/Identity.BLL.csproj" />
+    <Project Path="Identity.DAL/Identity.DAL.csproj" />
+    <Project Path="Identity.Models/Identity.Models.csproj" />
+    <Project Path="Identity.Seed/Identity.Seed.csproj" />
+  </Folder>
+  <Folder Name="/Backend/BusinessServices/InventoryService/">
+    <Project Path="Inventory.API/Inventory.API.csproj" />
+    <Project Path="Inventory.BLL/Inventory.BLL.csproj" />
+    <Project Path="Inventory.DAL/Inventory.DAL.csproj" />
+    <Project Path="Inventory.Models/Inventory.Models.csproj" />
+  </Folder>
+  <Folder Name="/Backend/BusinessServices/ProcurementService/">
+    <Project Path="Procurement.API/Procurement.API.csproj" />
+    <Project Path="Procurement.BLL/Procurement.BLL.csproj" />
+    <Project Path="Procurement.DAL/Procurement.DAL.csproj" />
+    <Project Path="Procurement.Models/Procurement.Models.csproj" />
+    <Project Path="Procurement.Excel/Procurement.Excel.csproj" />
+  </Folder>
+  <Folder Name="/Backend/BusinessServices/WarehouseService/">
+    <Project Path="Warehouse.API/Warehouse.API.csproj" />
+    <Project Path="Warehouse.BLL/Warehouse.BLL.csproj" />
+    <Project Path="Warehouse.DAL/Warehouse.DAL.csproj" />
+    <Project Path="Warehouse.Models/Warehouse.Models.csproj" />
+  </Folder>
+  <Folder Name="/Frontend/">
+    <File Path="frontend/README.md" />
+    <File Path="frontend/.gitignore" />
+    <File Path="frontend/index.html" />
+    <File Path="frontend/package.json" />
+    <File Path="frontend/tsconfig.json" />
+    <File Path="frontend/package-lock.json" />
+    <File Path="frontend/vite.config.ts" />
+    <File Path="frontend/vitest.config.ts" />
+  </Folder>
+  <Folder Name="/Frontend/public/" />
+  <Folder Name="/Frontend/src/">
+    <File Path="frontend/src/main.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/app/">
+    <File Path="frontend/src/app/app.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/app/providers/">
+    <File Path="frontend/src/app/providers/auth-provider.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/app/routes/" />
+  <Folder Name="/Frontend/src/assets/" />
+  <Folder Name="/Frontend/src/assets/icons/" />
+  <Folder Name="/Frontend/src/assets/images/" />
+  <Folder Name="/Frontend/src/features/" />
+  <Folder Name="/Frontend/src/features/auth/" />
+  <Folder Name="/Frontend/src/features/auth/api/">
+    <File Path="frontend/src/features/auth/api/auth-api.ts" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/auth/components/">
+    <File Path="frontend/src/features/auth/components/login-form.tsx" />
+    <File Path="frontend/src/features/auth/components/login-illustration.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/auth/hooks/" />
+  <Folder Name="/Frontend/src/features/auth/pages/">
+    <File Path="frontend/src/features/auth/pages/login-page.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/auth/schemas/" />
+  <Folder Name="/Frontend/src/features/auth/types/">
+    <File Path="frontend/src/features/auth/types/auth.ts" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/catalog/" />
+  <Folder Name="/Frontend/src/features/catalog/api/" />
+  <Folder Name="/Frontend/src/features/catalog/components/" />
+  <Folder Name="/Frontend/src/features/catalog/hooks/" />
+  <Folder Name="/Frontend/src/features/catalog/pages/" />
+  <Folder Name="/Frontend/src/features/catalog/schemas/" />
+  <Folder Name="/Frontend/src/features/catalog/types/" />
+  <Folder Name="/Frontend/src/features/inventory/" />
+  <Folder Name="/Frontend/src/features/inventory/api/" />
+  <Folder Name="/Frontend/src/features/inventory/components/" />
+  <Folder Name="/Frontend/src/features/inventory/hooks/" />
+  <Folder Name="/Frontend/src/features/inventory/pages/" />
+  <Folder Name="/Frontend/src/features/inventory/schemas/" />
+  <Folder Name="/Frontend/src/features/inventory/types/" />
+  <Folder Name="/Frontend/src/features/procurement/" />
+  <Folder Name="/Frontend/src/features/procurement/api/">
+    <File Path="frontend/src/features/procurement/api/purchase-order-api.ts" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/procurement/components/">
+    <File Path="frontend/src/features/procurement/components/po-common.tsx" />
+    <File Path="frontend/src/features/procurement/components/purchasing-layout.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/procurement/hooks/">
+    <File Path="frontend/src/features/procurement/hooks/use-po-error.ts" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/procurement/pages/">
+    <File Path="frontend/src/features/procurement/pages/create-purchase-order-page.tsx" />
+    <File Path="frontend/src/features/procurement/pages/import-purchase-order-page.tsx" />
+    <File Path="frontend/src/features/procurement/pages/purchase-order-detail-page.tsx" />
+    <File Path="frontend/src/features/procurement/pages/purchase-order-list-page.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/procurement/schemas/" />
+  <Folder Name="/Frontend/src/features/procurement/types/">
+    <File Path="frontend/src/features/procurement/types/purchase-order.ts" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/warehouse/" />
+  <Folder Name="/Frontend/src/features/warehouse/api/" />
+  <Folder Name="/Frontend/src/features/warehouse/components/" />
+  <Folder Name="/Frontend/src/features/warehouse/hooks/" />
+  <Folder Name="/Frontend/src/features/warehouse/pages/" />
+  <Folder Name="/Frontend/src/features/warehouse/schemas/" />
+  <Folder Name="/Frontend/src/features/warehouse/types/" />
+  <Folder Name="/Frontend/src/layouts/" />
+  <Folder Name="/Frontend/src/shared/" />
+  <Folder Name="/Frontend/src/shared/components/" />
+  <Folder Name="/Frontend/src/shared/components/common/" />
+  <Folder Name="/Frontend/src/shared/components/ui/">
+    <File Path="frontend/src/shared/components/ui/box-mark.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/shared/config/" />
+  <Folder Name="/Frontend/src/shared/hooks/" />
+  <Folder Name="/Frontend/src/shared/lib/">
+    <File Path="frontend/src/shared/lib/http-client.ts" />
+  </Folder>
+  <Folder Name="/Frontend/src/shared/types/" />
+  <Folder Name="/Frontend/src/shared/utils/" />
+  <Folder Name="/Frontend/src/styles/">
+    <File Path="frontend/src/styles/globals.css" />
+    <File Path="frontend/src/styles/workspace.css" />
+  </Folder>
+  <Folder Name="/Backend/Shared/">
+    <Project Path="WMS.ServiceDefaults/WMS.ServiceDefaults.csproj" />
+    <Project Path="WMS.Audit/WMS.Audit.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/Identity.Authentication.Tests/Identity.Authentication.Tests.csproj" />
+    <Project Path="tests/Inventory.Inbound.Tests/Inventory.Inbound.Tests.csproj" />
+    <Project Path="tests/Procurement.Excel.Tests/Procurement.Excel.Tests.csproj" />
+    <Project Path="tests/Procurement.Tests/Procurement.Tests.csproj" />
+    <Project Path="tests/WMS.Audit.Source.Tests/WMS.Audit.Source.Tests.csproj" />
+    <Project Path="tests/WMS.Audit.Gateway.Tests/WMS.Audit.Gateway.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/dashboard/" />
+  <Folder Name="/Frontend/src/features/dashboard/pages/">
+    <File Path="frontend/src/features/dashboard/pages/workspace-page.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/procurement/styles/">
+    <File Path="frontend/src/features/procurement/styles/purchase-orders.css" />
+  </Folder>
+  <Folder Name="/scripts/">
+    <File Path="scripts/seed-po-catalog.ps1" />
+    <File Path="scripts/start-ewms.ps1" />
+    <File Path="scripts/start-identity.ps1" />
+  </Folder>
+  <Folder Name="/scripts/sql/">
+    <File Path="scripts/sql/seed-po-catalog.sql" />
+  </Folder>
+  <Folder Name="/scripts/tests/">
+    <File Path="scripts/tests/start-identity.tests.ps1" />
+    <File Path="scripts/tests/start-ewms.tests.ps1" />
+  </Folder>
+  <Folder Name="/Documentation/">
+    <File Path="docs/purchase-orders.md" />
+    <File Path="docs/audit-logs.md" />
+  </Folder>
+  <Folder Name="/Frontend/tests/">
+    <File Path="frontend/tests/navigation.test.tsx" />
+    <File Path="frontend/tests/http-client.test.ts" />
+    <File Path="frontend/tests/audit.test.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/audit/" />
+  <Folder Name="/Frontend/src/features/audit/api/">
+    <File Path="frontend/src/features/audit/api/audit-api.ts" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/audit/components/">
+    <File Path="frontend/src/features/audit/components/admin-layout.tsx" />
+    <File Path="frontend/src/features/audit/components/audit-common.tsx" />
+    <File Path="frontend/src/features/audit/components/audit-values.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/audit/pages/">
+    <File Path="frontend/src/features/audit/pages/audit-detail-page.tsx" />
+    <File Path="frontend/src/features/audit/pages/audit-list-page.tsx" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/audit/styles/">
+    <File Path="frontend/src/features/audit/styles/audit.css" />
+  </Folder>
+  <Folder Name="/Frontend/src/features/audit/types/">
+    <File Path="frontend/src/features/audit/types/audit.ts" />
+  </Folder>
+</Solution>

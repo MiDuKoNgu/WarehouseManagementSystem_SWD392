@@ -4,12 +4,13 @@ import { purchaseOrderApi } from '../api/purchase-order-api';
 import { PurchasingLayout } from '../components/purchasing-layout';
 import { formatDate, PoError } from '../components/po-common';
 import { usePoError } from '../hooks/use-po-error';
-import type { ImportPreview } from '../types/purchase-order';
+import type { ImportPreview, PurchaseOrderOptions } from '../types/purchase-order';
 
 export function ImportPurchaseOrderPage() {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<ImportPreview | null>(null);
+  const [options, setOptions] = useState<PurchaseOrderOptions | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState<'preview' | 'confirm' | 'template' | null>(null);
   const operation = useRef(false);
@@ -25,7 +26,10 @@ export function ImportPurchaseOrderPage() {
     if (!file.name.toLowerCase().endsWith('.xlsx')) { setError('Chỉ hỗ trợ file Excel .xlsx. Hãy dùng file mẫu bên dưới.'); return; }
     if (file.size > 2 * 1024 * 1024) { setError('File không được lớn hơn 2 MB.'); return; }
     operation.current = true; setBusy('preview');
-    try { setPreview(await purchaseOrderApi.preview(file)); }
+    try {
+      const [result, references] = await Promise.all([purchaseOrderApi.preview(file), purchaseOrderApi.options()]);
+      setOptions(references); setPreview(result);
+    }
     catch (reason) { setError(explain(reason)); }
     finally { operation.current = false; setBusy(null); }
   }
@@ -48,7 +52,7 @@ export function ImportPurchaseOrderPage() {
     {preview && <section className="po-preview-section" aria-labelledby="preview-title">
       <div className="section-heading"><h2 id="preview-title">Xem trước dữ liệu</h2><span className={`po-preview-result ${preview.valid ? 'is-valid' : ''}`}>{preview.valid ? '✓ Dữ liệu hợp lệ' : errorRows > 0 ? `${errorRows} dòng có lỗi` : 'Cần kiểm tra dữ liệu'}</span></div>
       {preview.errors.length > 0 && <div className="po-alert" role="alert"><strong>Cần kiểm tra lại file</strong><ul>{preview.errors.map((item, index) => <li key={index}>{item}</li>)}</ul></div>}
-      <div className="po-card po-table-wrap"><table className="po-table po-preview-table"><thead><tr><th>Dòng</th><th>NCC / Kho</th><th>Sản phẩm</th><th className="po-number">Số lượng</th><th>Ngày giao</th><th>Ghi chú</th><th>Kết quả</th></tr></thead><tbody>{preview.rows.map(row => <tr key={row.rowNumber} className={row.errors.length > 0 ? 'po-row-invalid' : ''}><td>{row.rowNumber}</td><td>{row.supplierId ?? '—'} / {row.warehouseId ?? '—'}</td><td><strong>{row.productCode || '—'}</strong>{row.productName && <small>{row.productName}</small>}</td><td className="po-number">{row.quantity?.toLocaleString('vi-VN') ?? '—'}</td><td>{formatDate(row.expectedArrivalDate)}</td><td className="po-preview-note">{row.note || '—'}</td><td>{row.errors.length ? <ul className="po-row-errors">{row.errors.map((item, index) => <li key={index}>{item}</li>)}</ul> : <span className="po-row-valid">Hợp lệ</span>}</td></tr>)}</tbody></table>{preview.rows.length === 0 && <p className="po-no-results">File chưa có dòng sản phẩm để nhập.</p>}</div>
+      <div className="po-card po-table-wrap"><table className="po-table po-preview-table"><thead><tr><th>Dòng</th><th>Nhà cung cấp / Kho nhận</th><th>Sản phẩm</th><th className="po-number">Số lượng</th><th>Ngày giao</th><th>Ghi chú</th><th>Kết quả</th></tr></thead><tbody>{preview.rows.map(row => <tr key={row.rowNumber} className={row.errors.length > 0 ? 'po-row-invalid' : ''}><td>{row.rowNumber}</td><td><strong>{options?.suppliers.find(supplier => supplier.supplierId === row.supplierId)?.supplierName ?? (row.supplierId == null ? 'Chưa có nhà cung cấp' : `Không tìm thấy nhà cung cấp (#${row.supplierId})`)}</strong><small>Kho nhận: {options?.warehouses.find(warehouse => warehouse.warehouseId === row.warehouseId)?.warehouseName ?? (row.warehouseId == null ? 'Chưa có kho nhận' : `Không tìm thấy kho (#${row.warehouseId})`)}</small></td><td><strong>{row.productCode || '—'}</strong>{row.productName && <small>{row.productName}</small>}</td><td className="po-number">{row.quantity?.toLocaleString('vi-VN') ?? '—'}</td><td>{formatDate(row.expectedArrivalDate)}</td><td className="po-preview-note">{row.note || '—'}</td><td>{row.errors.length ? <ul className="po-row-errors">{row.errors.map((item, index) => <li key={index}>{item}</li>)}</ul> : <span className="po-row-valid">Hợp lệ</span>}</td></tr>)}</tbody></table>{preview.rows.length === 0 && <p className="po-no-results">File chưa có dòng sản phẩm để nhập.</p>}</div>
       <div className="po-submit-bar"><p>{preview.valid ? 'Dữ liệu chưa được lưu. Xác nhận để tạo PO nháp và Audit Log.' : 'Sửa các lỗi trong file Excel, sau đó tải lên kiểm tra lại.'}</p><button type="button" className="po-primary-button" onClick={confirm} disabled={!preview.valid || !preview.token || busy !== null}>{busy === 'confirm' ? 'Đang tạo đơn…' : 'Xác nhận import →'}</button></div>
       {preview.valid && <p className="po-bottom-note">Bản xem trước có hiệu lực trong 15 phút. Dữ liệu được kiểm tra lại khi xác nhận.</p>}
     </section>}

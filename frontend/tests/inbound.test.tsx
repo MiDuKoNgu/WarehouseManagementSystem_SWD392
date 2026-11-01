@@ -39,15 +39,86 @@ async function enterSerial(value = 'SN-AbC-001') {
   fireEvent.change(screen.getByLabelText('Serial'), { target: { value } });
 }
 
+it('shows missing values below their fields and in a dismissible toast without sending a save', async () => {
+  render(<App />); await screen.findByRole('heading', { name: 'INB-001' });
+  const form = screen.getByRole('button', { name: 'Xác nhận thêm Serial' }).closest('form')!;
+  expect(form.noValidate).toBe(true);
+  fireEvent.submit(form);
+  for (const label of ['Tháng sản xuất', 'Năm sản xuất', 'Serial']) {
+    const field = screen.getByLabelText(label);
+    expect(field.getAttribute('aria-invalid')).toBe('true');
+    const inline = document.getElementById(field.getAttribute('aria-describedby')!);
+    expect(inline?.className).toBe('inbound-field-error');
+    expect(inline?.textContent).toBeTruthy();
+  }
+  expect(document.activeElement).toBe(screen.getByLabelText('Tháng sản xuất'));
+  expect(within(screen.getByRole('alert')).getByText(/Vui lòng nhập Serial/)).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'Đóng thông báo lỗi' }));
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(screen.getByText('Vui lòng nhập Serial.')).toBeTruthy();
+  expect(vi.mocked(fetch).mock.calls.some(([path]) => path === '/api/inbounds/1/items')).toBe(false);
+});
+
+it('checks a field on blur and clears its old error when the user corrects the value', async () => {
+  render(<App />); await enterSerial('   ');
+  fireEvent.blur(screen.getByLabelText('Serial'));
+  expect(screen.getAllByText('Vui lòng nhập Serial.')).toHaveLength(2);
+  fireEvent.change(screen.getByLabelText('Serial'), { target: { value: 'CORRECTED-SERIAL' } });
+  expect(screen.queryByText('Vui lòng nhập Serial.')).toBeNull();
+  expect(screen.getByLabelText('Serial').getAttribute('aria-invalid')).toBe('false');
+  fireEvent.submit(screen.getByRole('button', { name: 'Xác nhận thêm Serial' }).closest('form')!);
+  await screen.findByText('CORRECTED-SERIAL');
+});
+
+it('shows a server error beside the submit action and in a toast, retains values and allows retry', async () => {
+  const save = vi.spyOn(inboundApi, 'saveItem').mockRejectedValueOnce(new Error('Serial đã tồn tại trong hệ thống.'));
+  try {
+    render(<App />); await enterSerial('DUPLICATE-SERIAL');
+    fireEvent.submit(screen.getByRole('button', { name: 'Xác nhận thêm Serial' }).closest('form')!);
+    await waitFor(() => expect(screen.getAllByText('Serial đã tồn tại trong hệ thống.')).toHaveLength(2));
+    const form = screen.getByRole('button', { name: 'Xác nhận thêm Serial' }).closest('form')!;
+    expect(within(form).getByRole('alert').textContent).toContain('Serial đã tồn tại');
+    expect((screen.getByLabelText('Serial') as HTMLInputElement).value).toBe('DUPLICATE-SERIAL');
+    expect((screen.getByLabelText('Tháng sản xuất') as HTMLSelectElement).value).toBe('8');
+    fireEvent.change(screen.getByLabelText('Serial'), { target: { value: 'RETRY-SERIAL' } });
+    expect(screen.queryByText('Serial đã tồn tại trong hệ thống.')).toBeNull();
+    fireEvent.submit(form);
+    await screen.findByText('RETRY-SERIAL');
+    expect(save).toHaveBeenCalledTimes(2);
+  } finally { save.mockRestore(); }
+});
+
 it('saves manual serial with exact case, row version and CSRF; retains month/year and clears serial', async () => {
   render(<App />); await enterSerial(); fireEvent.submit(screen.getByRole('button', { name: 'Xác nhận thêm Serial' }).closest('form')!);
   await screen.findByText('SN-AbC-001');
+  const toast = screen.getByText('Đã thêm Serial thành công.').closest('[role="status"]')!;
+  expect(toast.className).toContain('inbound-success-toast');
+  fireEvent.click(within(toast as HTMLElement).getByRole('button', { name: 'Đóng thông báo thành công' }));
+  expect(screen.queryByText('Đã thêm Serial thành công.')).toBeNull();
   const [, init] = vi.mocked(fetch).mock.calls.find(([path]) => path === '/api/inbounds/1/items')!;
   expect(JSON.parse(String(init?.body))).toMatchObject({ serial: 'SN-AbC-001', manufacturingMonth: 8, manufacturingYear: 2025, rowVersion: 'AAAAAAAAAAE=', inputMethod: 'MANUAL', poLineId: 11 });
   expect((init?.headers as Record<string, string>)['X-CSRF-TOKEN']).toBe('inbound-csrf');
   expect((screen.getByLabelText('Serial') as HTMLInputElement).value).toBe('');
   expect((screen.getByLabelText('Tháng sản xuất') as HTMLSelectElement).value).toBe('8');
   expect((screen.getByLabelText('Năm sản xuất') as HTMLInputElement).value).toBe('2025');
+});
+
+it('keeps the success toast visible after saving an edit and returning to add mode', async () => {
+  render(<App />); await enterSerial();
+  fireEvent.submit(screen.getByRole('button', { name: 'Xác nhận thêm Serial' }).closest('form')!);
+  await screen.findByText('SN-AbC-001');
+  fireEvent.click(screen.getByRole('button', { name: 'Sửa Serial' }));
+  await screen.findByRole('button', { name: 'Lưu thay đổi Serial' });
+  const save = vi.spyOn(inboundApi, 'saveItem').mockResolvedValueOnce({ ...detail, items: detail.items.map(item => ({ ...item, scannedSerial: 'EDITED-SERIAL' })) });
+  try {
+    fireEvent.change(screen.getByLabelText('Serial'), { target: { value: 'EDITED-SERIAL' } });
+    fireEvent.submit(screen.getByRole('button', { name: 'Lưu thay đổi Serial' }).closest('form')!);
+    await screen.findByRole('button', { name: 'Xác nhận thêm Serial' });
+    const toast = screen.getByText('Đã cập nhật Serial thành công.').closest('[role="status"]')!;
+    expect(toast.className).toContain('inbound-success-toast');
+    expect(screen.getByText('EDITED-SERIAL')).toBeTruthy();
+    expect(screen.getByText('Đã cập nhật Serial. Lịch sử thay đổi đã được lưu.')).toBeTruthy();
+  } finally { save.mockRestore(); }
 });
 
 it('clears production metadata when changing product and rejects future production', async () => {
@@ -59,7 +130,9 @@ it('clears production metadata when changing product and rejects future producti
   fireEvent.change(screen.getByLabelText('Năm sản xuất'), { target: { value: '9999' } });
   fireEvent.change(screen.getByLabelText('Serial'), { target: { value: 'SN-FUTURE' } });
   fireEvent.submit(screen.getByRole('button', { name: 'Xác nhận thêm Serial' }).closest('form')!);
-  await screen.findByText('Kiểm tra Serial, sản phẩm và tháng/năm sản xuất; không được chọn thời gian tương lai.');
+  expect(screen.getByLabelText('Năm sản xuất').getAttribute('aria-invalid')).toBe('true');
+  expect(document.getElementById(screen.getByLabelText('Năm sản xuất').getAttribute('aria-describedby')!)?.textContent).toMatch(/Năm sản xuất phải từ 1900/);
+  expect(within(screen.getByRole('alert')).getByText(/Năm sản xuất phải từ 1900/)).toBeTruthy();
   expect(vi.mocked(fetch).mock.calls.some(([path]) => path === '/api/inbounds/1/items')).toBe(false);
 });
 
@@ -67,7 +140,8 @@ it('requires a damage description and respects server policy hiding damaged acce
   render(<App />); await enterSerial();
   fireEvent.change(screen.getByLabelText('Tình trạng'), { target: { value: 'DAMAGED' } });
   fireEvent.submit(screen.getByRole('button', { name: 'Xác nhận thêm Serial' }).closest('form')!);
-  await screen.findByText('Hàng hỏng cần mô tả tình trạng.');
+  expect(screen.getAllByText('Hàng hỏng cần mô tả tình trạng.')).toHaveLength(2);
+  expect(screen.getByLabelText('Ghi chú tình trạng').getAttribute('aria-invalid')).toBe('true');
   expect(vi.mocked(fetch).mock.calls.some(([path]) => path === '/api/inbounds/1/items')).toBe(false);
   cleanup(); detail.policy.acceptDamaged = false; render(<App />); await screen.findByRole('heading', { name: 'INB-001' });
   expect(screen.queryByRole('option', { name: /DAMAGED/ })).toBeNull();
@@ -91,7 +165,7 @@ it('refuses severely damaged devices without saving a serial even if form submis
   expect(screen.getByText('Không tiếp nhận thiết bị này. Không thêm Serial vào phiếu; tách hàng hỏng nặng để xử lý với nhà cung cấp.')).toBeTruthy();
   const submit = screen.getByRole('button', { name: 'Xác nhận thêm Serial' }) as HTMLButtonElement;
   expect(submit.disabled).toBe(true); fireEvent.submit(submit.closest('form')!);
-  await screen.findByText('Không tiếp nhận hàng hỏng nặng. Không được thêm Serial này vào phiếu.');
+  expect(screen.getAllByText('Không tiếp nhận hàng hỏng nặng. Không được thêm Serial này vào phiếu.')).toHaveLength(2);
   expect(vi.mocked(fetch).mock.calls.some(([path]) => path === '/api/inbounds/1/items')).toBe(false);
 });
 

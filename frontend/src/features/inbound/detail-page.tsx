@@ -1,10 +1,10 @@
-﻿import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { inboundApi } from './api';
 import type { ReceiptDetail, ReceiptItem, SaveReceiptItem } from './types';
 import { date, ErrorNotice, InboundLayout, message, Status } from './layout';
 import { Progress } from './progress';
-import { SerialCapture } from './serial-capture';
+import { SerialForm } from './serial-form';
 
 export function InboundDetailPage({ id }: { id: number }) {
   const [data, setData] = useState<ReceiptDetail | null>(null); const [error, setError] = useState(''); const [success, setSuccess] = useState('');
@@ -13,8 +13,8 @@ export function InboundDetailPage({ id }: { id: number }) {
   useEffect(() => { let active = true; setLoading(true); setError(''); inboundApi.detail(id).then(value => { if (active) { setData(value); setEditing(null); } }).catch(e => { if (active) setError(message(e)); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [id, attempt]);
   async function save(body: SaveReceiptItem) {
     setBusy(true); setError(''); setSuccess('');
-    try { const value = await inboundApi.saveItem(id, editing?.inboundItemId ?? null, body); setData(value); setEditing(null); setSuccess(editing ? 'Đã cập nhật Serial. Lịch sử thay đổi đã được lưu.' : 'Đã thêm Serial. Kiểm tra thông tin để tiếp tục quét.'); return true; }
-    catch (e) { setError(message(e)); return false; } finally { setBusy(false); }
+    try { const value = await inboundApi.saveItem(id, editing?.inboundItemId ?? null, body); setData(value); setEditing(null); setSuccess(editing ? 'Đã cập nhật Serial. Lịch sử thay đổi đã được lưu.' : 'Đã thêm Serial. Kiểm tra thông tin để tiếp tục quét.'); return null; }
+    catch (e) { return message(e); } finally { setBusy(false); }
   }
   async function finish(reason: string) {
     if (!data || !action || busy) return; setBusy(true); setError(''); setSuccess('');
@@ -41,29 +41,6 @@ export function InboundDetailPage({ id }: { id: number }) {
     {action && data && <ConfirmDialog title={action === 'complete' ? 'Hoàn tất phiếu nhập?' : 'Hủy phiếu nhập?'} busy={busy} reasonRequired={action === 'cancel'} onCancel={() => setAction(null)} onConfirm={reason => void finish(reason)}><p>{action === 'complete' ? `Xác nhận ${data.items.length} serial. Sau khi hoàn tất, phiếu không thể sửa; thiết bị chuyển sang chờ Putaway.` : 'Các Serial nháp sẽ được hủy hiệu lực và lưu dấu vết. Phiếu không thể tiếp tục tiếp nhận.'}</p><ErrorNotice error={error} /></ConfirmDialog>}
     {removing && <ConfirmDialog title="Hủy Serial nhập sai?" busy={busy} onCancel={() => setRemoving(null)} onConfirm={() => void remove()}><p className="inbound-serial">{removing.scannedSerial}</p><p>Hủy hiệu lực bản ghi nháp và giữ lịch sử thao tác.</p><ErrorNotice error={error} /></ConfirmDialog>}
   </InboundLayout>;
-}
-
-function SerialForm({ data, editing, busy, save, cancel }: { data: ReceiptDetail; editing: ReceiptItem | null; busy: boolean; save: (body: SaveReceiptItem) => Promise<boolean>; cancel: () => void }) {
-  const [line, setLine] = useState(String(data.lines[0]?.poLineId || '')); const [month, setMonth] = useState(''); const [year, setYear] = useState(''); const [condition, setCondition] = useState('GOOD'); const [note, setNote] = useState(''); const [serial, setSerial] = useState(''); const [method, setMethod] = useState('MANUAL'); const [retain, setRetain] = useState(true); const [error, setError] = useState(''); const [generation, setGeneration] = useState(0); const input = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (editing) { setLine(String(editing.poLineId)); setMonth(String(editing.manufacturingMonth || '')); setYear(String(editing.manufacturingYear || '')); setCondition(editing.receivedCondition || 'GOOD'); setNote(editing.conditionNote || ''); setSerial(editing.scannedSerial); setMethod(['CAMERA', 'IMAGE_UPLOAD', 'MANUAL'].includes(editing.inputMethod) ? editing.inputMethod : 'MANUAL'); }
-    else { setSerial(''); setMethod('MANUAL'); setCondition('GOOD'); setNote(''); }
-    setError(''); setGeneration(g => g + 1);
-  }, [editing]);
-  function changeProduct(value: string) { setLine(value); setMonth(''); setYear(''); setSerial(''); setMethod('MANUAL'); setNote(''); setCondition('GOOD'); setError('Đã đổi sản phẩm. Vui lòng kiểm tra lại tháng/năm sản xuất trên tem.'); setGeneration(g => g + 1); }
-  async function submit(e: FormEvent) {
-    e.preventDefault(); if (busy) return; setError('');
-    if (condition === 'REJECTED') { setError('Không tiếp nhận hàng hỏng nặng. Không được thêm Serial này vào phiếu.'); return; }
-    const m = Number(month); const y = Number(year); const now = new Date(); const vn = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', timeZone: 'Asia/Ho_Chi_Minh' }).formatToParts(now); const cy = Number(vn.find(p => p.type === 'year')?.value); const cm = Number(vn.find(p => p.type === 'month')?.value);
-    if (!serial.trim() || serial.trim().length > 100 || !line || m < 1 || m > 12 || !Number.isInteger(y) || y < 1900 || y > cy || y === cy && m > cm) { setError('Kiểm tra Serial, sản phẩm và tháng/năm sản xuất; không được chọn thời gian tương lai.'); return; }
-    if (condition === 'DAMAGED' && !note.trim()) { setError('Hàng hỏng cần mô tả tình trạng.'); return; }
-    if (await save({ poLineId: Number(line), serial: serial.trim(), manufacturingMonth: m, manufacturingYear: y, receivedCondition: condition, conditionNote: note, inputMethod: method, rowVersion: data.receipt.rowVersion })) {
-      setSerial(''); setMethod('MANUAL'); setNote(''); setCondition('GOOD'); setGeneration(g => g + 1); if (!retain) { setMonth(''); setYear(''); } input.current?.focus();
-    }
-  }
-  return <section className="po-card inbound-serial-form"><h2>{editing ? 'Sửa Serial nháp' : 'Tiếp nhận Serial'}</h2><form onSubmit={e => void submit(e)}><fieldset className="po-fieldset" disabled={busy}><ErrorNotice error={error} /><div className="inbound-form-group"><h3>1. Thông tin sản phẩm</h3><label>Sản phẩm<select required value={line} onChange={e => changeProduct(e.target.value)}><option value="">Chọn dòng PO</option>{data.lines.map(l => <option key={l.poLineId} value={l.poLineId}>{l.productCode} · {l.productName} · còn {l.remainingQuantity}</option>)}</select></label></div>
-    <div className="inbound-form-group"><h3>2. Sản xuất & tình trạng</h3><div className="inbound-two-columns"><label>Tháng sản xuất<select required value={month} onChange={e => setMonth(e.target.value)}><option value="">Tháng</option>{Array.from({ length: 12 }, (_, i) => <option key={i} value={i + 1}>{i + 1}</option>)}</select></label><label>Năm sản xuất<input required type="number" min={1900} max={new Date().getFullYear() + 1} step={1} value={year} onChange={e => setYear(e.target.value)} inputMode="numeric" /></label></div><label className="inbound-checkbox"><input type="checkbox" checked={retain} onChange={e => setRetain(e.target.checked)} />Giữ tháng/năm cho Serial tiếp theo</label><label>Tình trạng<select value={condition} onChange={e => setCondition(e.target.value)}><option value="GOOD">GOOD — Hàng tốt</option>{data.policy.acceptDamaged && <option value="DAMAGED">DAMAGED — Hỏng nhẹ / móp méo — nhận cách ly</option>}<option value="REJECTED">Hỏng nặng — không tiếp nhận</option></select></label><label>Ghi chú tình trạng<textarea required={condition === 'DAMAGED'} maxLength={1000} value={note} onChange={e => setNote(e.target.value)} /></label>{condition === 'DAMAGED' && <p className="po-helper">Chỉ tiếp nhận hàng hỏng nhẹ / móp méo sau khi kiểm tra. Thiết bị sẽ bị cách ly, không được ghi nhận vào nguồn hàng khả dụng.</p>}{condition === 'REJECTED' && <p className="po-alert" role="alert">Không tiếp nhận thiết bị này. Không thêm Serial vào phiếu; tách hàng hỏng nặng để xử lý với nhà cung cấp.</p>}</div>
-    <div className="inbound-form-group"><h3>3. Nhận diện Serial</h3><SerialCapture resetKey={`${line}-${generation}`} disabled={busy || !line} onRescan={() => { setSerial(''); setMethod('MANUAL'); }} onChoose={(value, source) => { setSerial(value); setMethod(source); input.current?.focus(); }} /><label>Serial<input ref={input} required maxLength={100} autoComplete="off" value={serial} onChange={e => { setSerial(e.target.value); setMethod('MANUAL'); }} /></label><small className="po-muted">Nguồn: {method === 'CAMERA' ? 'Camera' : method === 'IMAGE_UPLOAD' ? 'Ảnh tem' : 'Nhập tay'} · Enter để thêm nhanh.</small></div><div className="po-actions"><button className="po-primary-button" disabled={busy || condition === 'REJECTED'}>{busy ? 'Đang lưu…' : editing ? 'Lưu thay đổi Serial' : 'Xác nhận thêm Serial'}</button>{editing && <button className="utility-button" type="button" onClick={cancel}>Dừng sửa</button>}</div></fieldset></form></section>;
 }
 
 function ConfirmDialog({ title, children, reasonRequired = false, busy, onCancel, onConfirm }: { title: string; children: React.ReactNode; reasonRequired?: boolean; busy: boolean; onCancel: () => void; onConfirm: (reason: string) => void }) {

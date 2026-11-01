@@ -159,19 +159,15 @@ it('requires explicit completion confirmation and locks the done receipt', async
   expect(JSON.parse(String(init?.body)).rowVersion).toBe('AAAAAAAAAAI=');
 });
 
-it('refuses severely damaged devices without saving a serial even if form submission is forced', async () => {
-  render(<App />); await enterSerial('SEVERE-DAMAGE-001');
-  fireEvent.change(screen.getByLabelText('Tình trạng'), { target: { value: 'REJECTED' } });
-  expect(screen.getByText('Không tiếp nhận thiết bị này. Không thêm Serial vào phiếu; tách hàng hỏng nặng để xử lý với nhà cung cấp.')).toBeTruthy();
-  const submit = screen.getByRole('button', { name: 'Xác nhận thêm Serial' }) as HTMLButtonElement;
-  expect(submit.disabled).toBe(true); fireEvent.submit(submit.closest('form')!);
-  expect(screen.getAllByText('Không tiếp nhận hàng hỏng nặng. Không được thêm Serial này vào phiếu.')).toHaveLength(2);
-  expect(vi.mocked(fetch).mock.calls.some(([path]) => path === '/api/inbounds/1/items')).toBe(false);
+it('offers only GOOD and DAMAGED receipt conditions', async () => {
+  render(<App />); await screen.findByRole('heading', { name: 'INB-001' });
+  const options = within(screen.getByLabelText('Tình trạng')).getAllByRole('option');
+  expect(options.map(option => (option as HTMLOptionElement).value)).toEqual(['GOOD', 'DAMAGED']);
 });
 
-it('accepts explicitly selected minor damage with a required condition description', async () => {
+it('accepts damaged goods with a required condition description', async () => {
   render(<App />); await enterSerial('MINOR-DENT-001');
-  expect(screen.getByRole('option', { name: 'DAMAGED — Hỏng nhẹ / móp méo — nhận cách ly' })).toBeTruthy();
+  expect(screen.getByRole('option', { name: 'DAMAGED — Hàng hỏng — nhận cách ly' })).toBeTruthy();
   fireEvent.change(screen.getByLabelText('Tình trạng'), { target: { value: 'DAMAGED' } });
   fireEvent.change(screen.getByLabelText('Ghi chú tình trạng'), { target: { value: 'Móp nhẹ vỏ ngoài, đã kiểm tra và chấp nhận cách ly.' } });
   fireEvent.submit(screen.getByRole('button', { name: 'Xác nhận thêm Serial' }).closest('form')!);

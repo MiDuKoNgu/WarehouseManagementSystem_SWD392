@@ -60,7 +60,6 @@ export function SerialForm({ data, editing, busy, save, cancel }: Props) {
     if (!month || !Number.isInteger(m) || m < 1 || m > 12) result.month = 'Vui lòng chọn tháng sản xuất.';
     if (!year || !Number.isInteger(y) || y < 1900 || y > cy) result.year = `Năm sản xuất phải từ 1900 đến ${cy}.`;
     if (!result.month && !result.year && y === cy && m > cm) result.month = 'Tháng/năm sản xuất không được ở tương lai.';
-    if (condition === 'REJECTED') result.condition = 'Không tiếp nhận hàng hỏng nặng. Không được thêm Serial này vào phiếu.';
     if (condition === 'DAMAGED' && !note.trim()) result.note = 'Hàng hỏng cần mô tả tình trạng.';
     if (note.length > 1000) result.note = 'Ghi chú tình trạng tối đa 1000 ký tự.';
     if (!serial.trim()) result.serial = 'Vui lòng nhập Serial.';
@@ -147,12 +146,10 @@ export function SerialForm({ data, editing, busy, save, cancel }: Props) {
           <label className="inbound-checkbox"><input type="checkbox" checked={retain} onChange={e => setRetain(e.target.checked)} />Giữ tháng/năm cho Serial tiếp theo</label>
           <label>Tình trạng<select name="condition" value={condition} {...fieldProps('condition')} onChange={e => { setCondition(e.target.value); clear('condition', 'note'); }}>
             <option value="GOOD">GOOD — Hàng tốt</option>
-            {data.policy.acceptDamaged && <option value="DAMAGED">DAMAGED — Hỏng nhẹ / móp méo — nhận cách ly</option>}
-            <option value="REJECTED">Hỏng nặng — không tiếp nhận</option>
+            {data.policy.acceptDamaged && <option value="DAMAGED">DAMAGED — Hàng hỏng — nhận cách ly</option>}
           </select></label>{fieldError('condition')}
           <label>Ghi chú tình trạng<textarea name="note" required={condition === 'DAMAGED'} maxLength={1000} value={note} {...fieldProps('note')} onChange={e => { setNote(e.target.value); clear('note'); }} /></label>{fieldError('note')}
-          {condition === 'DAMAGED' && <p className="po-helper">Chỉ tiếp nhận hàng hỏng nhẹ / móp méo sau khi kiểm tra. Thiết bị sẽ bị cách ly, không được ghi nhận vào nguồn hàng khả dụng.</p>}
-          {condition === 'REJECTED' && <p className="po-alert" role="alert">Không tiếp nhận thiết bị này. Không thêm Serial vào phiếu; tách hàng hỏng nặng để xử lý với nhà cung cấp.</p>}
+          {condition === 'DAMAGED' && <p className="po-helper">Thiết bị sẽ bị cách ly, không được ghi nhận vào nguồn hàng khả dụng.</p>}
         </div>
         <div className="inbound-form-group">
           <h3>3. Nhận diện Serial</h3>
@@ -162,7 +159,7 @@ export function SerialForm({ data, editing, busy, save, cancel }: Props) {
         </div>
         {saveError && <div className="po-alert inbound-save-error" role="alert"><p>{saveError}</p></div>}
         <div className="po-actions">
-          <button className="po-primary-button" disabled={busy || condition === 'REJECTED'}>{busy ? 'Đang lưu…' : editing ? 'Lưu thay đổi Serial' : 'Xác nhận thêm Serial'}</button>
+          <button className="po-primary-button" disabled={busy}>{busy ? 'Đang lưu…' : editing ? 'Lưu thay đổi Serial' : 'Xác nhận thêm Serial'}</button>
           {editing && <button className="utility-button" type="button" onClick={cancel}>Dừng sửa</button>}
         </div>
       </fieldset>

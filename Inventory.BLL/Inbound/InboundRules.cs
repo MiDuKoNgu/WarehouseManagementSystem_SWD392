@@ -15,9 +15,8 @@ public static class InboundRules
         if (value.PoLineId <= 0 || value.ManufacturingMonth is < 1 or > 12 || value.ManufacturingYear < 1900
             || value.ManufacturingYear > today.Year || value.ManufacturingYear == today.Year && value.ManufacturingMonth > today.Month)
             throw new ReceiptException(400, "Dòng PO hoặc tháng/năm sản xuất không hợp lệ; không được ở tương lai.");
-        // DAMAGED denotes minor damage explicitly accepted by warehouse staff into quarantine.
-        // Severely damaged/rejected devices never enter this receipt or physical inventory.
-        if (value.ReceivedCondition is not ("GOOD" or "DAMAGED")) throw new ReceiptException(400, "Chỉ tiếp nhận hàng tốt hoặc hàng hỏng nhẹ được chấp nhận cách ly; hàng hỏng nặng phải từ chối.");
+        // Damaged devices are received into quarantine.
+        if (value.ReceivedCondition is not ("GOOD" or "DAMAGED")) throw new ReceiptException(400, "Tình trạng chỉ được là GOOD hoặc DAMAGED.");
         if (value.ReceivedCondition == "DAMAGED" && (!policy.AcceptDamaged || string.IsNullOrWhiteSpace(value.ConditionNote)))
             throw new ReceiptException(400, policy.AcceptDamaged ? "Hàng hỏng cần mô tả tình trạng." : "Kho chưa cho phép tiếp nhận hàng hỏng.");
         if (value.ConditionNote?.Length > 1000) throw new ReceiptException(400, "Ghi chú tình trạng tối đa 1000 ký tự.");

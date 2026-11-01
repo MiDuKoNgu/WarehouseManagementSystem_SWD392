@@ -52,7 +52,6 @@ internal static class InboundTests
         Reject(()=>InboundRules.Validate(Valid with {ManufacturingMonth=12},Policy,Today),400,"future month");
         Reject(()=>InboundRules.Validate(Valid with {PoLineId=0},Policy,Today),400,"line required");
         Reject(()=>InboundRules.Validate(Valid with {ReceivedCondition="UNKNOWN"},Policy,Today),400,"condition enum");
-        Reject(()=>InboundRules.Validate(Valid with {ReceivedCondition="REJECTED",ConditionNote="Severe damage"},Policy,Today),400,"severe rejected goods cannot enter inventory");
         Reject(()=>InboundRules.Validate(Valid with {ReceivedCondition="DAMAGED"},Policy,Today),400,"damaged note required");
         Reject(()=>InboundRules.Validate(Valid with {ReceivedCondition="DAMAGED",ConditionNote="Broken"},new(),Today),400,"damaged policy");
         Check(InboundRules.Validate(Valid with {ReceivedCondition="DAMAGED",ConditionNote=" Broken "},Policy,Today).ConditionNote=="Broken","damaged description retained");

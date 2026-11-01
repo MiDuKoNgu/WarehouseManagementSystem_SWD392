@@ -10,6 +10,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddEwmsServiceSecurity(builder.Configuration);
+builder.Services.AddScoped(_ => new PutawayLayoutRepository(
+    builder.Configuration.GetConnectionString("Warehouse")
+    ?? throw new ServiceUnavailableException("Warehouse connection is not configured.")));
 builder.Services.AddScoped(_ => new WarehouseLookupRepository(
     builder.Configuration.GetConnectionString("Warehouse")
     ?? throw new ServiceUnavailableException("Warehouse connection is not configured.")));

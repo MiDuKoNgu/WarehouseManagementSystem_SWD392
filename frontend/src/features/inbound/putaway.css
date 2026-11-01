@@ -1,0 +1,62 @@
+.putaway-scan { padding: 24px; margin-bottom: 28px; }
+.po-heading .quiet-badge.putaway-count { display: inline-block; margin-bottom: 0; }
+.putaway-scan h2, .putaway-pending > h2, .putaway-locations h2 { margin: 0 0 16px; font-size: 18px; }
+.putaway-scan label, .putaway-search label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 500; }
+.putaway-input-action { display: flex; gap: 10px; }
+.putaway-input-action input, .putaway-modal input { min-width: 0; flex: 1; min-height: 44px; border: 1px solid #ddd; border-radius: 6px; padding: 10px 12px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; }
+.putaway-input-action button { flex-shrink: 0; }
+.putaway-scan > p { margin-bottom: 0; font-size: 12px; }
+.putaway-scan .inbound-upload { display: inline-flex; margin: 0; cursor: pointer; font-size: 13px; }
+.putaway-scan .serial-capture > p { font-size: 12px; line-height: 1.7; }
+.putaway-scan .inbound-camera { max-width: 720px; }
+.putaway-scan .inbound-camera video { max-height: 360px; object-fit: contain; }
+.putaway-workspace { display: grid; grid-template-columns: minmax(280px, .8fr) minmax(0, 1.4fr); gap: 28px; align-items: start; }
+.putaway-pending, .putaway-detail { min-width: 0; }
+.putaway-detail { scroll-margin-top: 20px; }
+.putaway-search { margin-bottom: 18px; }
+.putaway-pending-list { display: grid; gap: 12px; }
+.putaway-pending-list h3 { margin: 0; font-size: 15px; }
+.putaway-pending-list .putaway-product-name { margin-bottom: 18px; font-size: 14px; }
+.putaway-pending-list .inbound-block { margin-top: 5px; }
+.putaway-pagination { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 20px; font-size: 12px; }
+.putaway-profile { padding: 24px; margin-bottom: 24px; }
+.putaway-profile h2 { font-size: 21px; margin: 12px 0; }
+.putaway-profile h3 { font-size: 17px; font-weight: 500; margin-bottom: 24px; }
+.putaway-profile dl { margin: 0; }
+.putaway-condition { display: inline-block; color: #24654e; background: #edf5ef; border-radius: 4px; padding: 4px 7px; font-size: 11px; }
+.putaway-condition-damaged { color: #8a4528; background: #fff0e7; }
+.putaway-quarantine { border-left: 3px solid #bf874c; padding: 10px 12px; background: #fff9f0; font-size: 12px; line-height: 1.7; }
+.putaway-placeholder { text-align: center; padding: 64px 32px; color: var(--muted); }
+.putaway-placeholder > span { font-size: 38px; }
+.putaway-placeholder h2 { color: var(--ink); font-size: 20px; margin-top: 24px; }
+.putaway-placeholder p { line-height: 1.8; font-size: 13px; }
+.putaway-locations .po-heading { gap: 12px; margin-bottom: 12px; }
+.putaway-locations .po-heading p { margin-bottom: 0; font-size: 12px; }
+.putaway-location-filters { padding: 18px; margin: 18px 0; }
+.putaway-location-filters label { display: block; font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+.putaway-location-filter-fields { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; margin-top: 16px; }
+.putaway-location-filter-fields label { min-width: 0; margin-bottom: 0; }
+.putaway-location-filter-fields select { display: block; width: 100%; min-height: 44px; margin-top: 8px; padding: 9px; border: 1px solid #ddd; border-radius: 6px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; }
+.putaway-location-group { border: 0; padding: 0; margin: 24px 0; min-width: 0; }
+.putaway-location-group legend { font-weight: 600; font-size: 14px; margin-bottom: 14px; }
+.putaway-candidate-list { display: grid; gap: 10px; max-height: 580px; overflow-y: auto; padding: 2px; }
+.putaway-location-option { display: block; padding: 18px; cursor: pointer; }
+.putaway-location-selected { border-color: #327c72; box-shadow: 0 0 0 1px #327c72; }
+.putaway-location-group:disabled .putaway-location-option { opacity: .65; cursor: default; }
+.putaway-location-title { display: flex; gap: 9px; align-items: start; font-size: 13px; line-height: 1.7; font-weight: 500; }
+.putaway-location-title > span:not(.quiet-badge) { flex: 1; overflow-wrap: anywhere; }
+.putaway-location-title input { margin: 4px 0 0; accent-color: #327c72; width: 16px; height: 16px; flex-shrink: 0; }
+.putaway-location-body { padding-left: 25px; margin-top: 9px; }
+.putaway-location-body > small { font-size: 11px; line-height: 1.8; }
+.putaway-location-body dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0; }
+.putaway-location-body dt { font-size: 10px; color: var(--muted); }
+.putaway-location-body dd { margin: 4px 0 0; font-size: 12px; }
+.putaway-packing-note { font-size: 11px; line-height: 1.8; }
+.putaway-selection { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px; margin: 20px 0; }
+.putaway-selection p { font-size: 13px; margin-bottom: 0; line-height: 1.7; }
+.putaway-selection small { font-size: 10px; }
+.putaway-selection button { flex-shrink: 0; }
+.putaway-modal input { display: block; width: 100%; margin: 10px 0 18px; }
+@media (max-width: 1200px) { .putaway-workspace { grid-template-columns: minmax(0,1fr); } .putaway-pending-list { grid-template-columns: repeat(auto-fit,minmax(min(100%,280px),1fr)); } }
+@media (max-width: 600px) { .putaway-scan, .putaway-profile { padding: 20px 16px; } .putaway-input-action { flex-direction: column; } .putaway-input-action input, .putaway-modal input { font-size: 16px; width: 100%; } .putaway-location-option { padding: 16px 12px; } .putaway-location-body { padding-left: 0; } .putaway-selection { flex-direction: column; align-items: stretch; } .putaway-locations .po-heading { align-items: start; } }
+@media (max-width: 600px) { .putaway-location-filters { padding: 16px; } .putaway-location-filter-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } .putaway-location-filter-fields select { font-size: 16px; } }

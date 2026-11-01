@@ -23,8 +23,9 @@ internal static class SqlTests
             await using var sql=new SqlConnection(settings.ConnectionString);await sql.OpenAsync();
             await Execute(sql,await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"Schema.sql")));
             var root=new DirectoryInfo(AppContext.BaseDirectory);
-            while(root is not null&&!Directory.Exists(Path.Combine(root.FullName,"Inventory.API")))root=root.Parent;
-            var migration=await File.ReadAllTextAsync(Path.Combine(root!.FullName,"scripts/sql/migrate-inbound.sql"));
+            while(root is not null&&!File.Exists(Path.Combine(root.FullName,"scripts/sql/migrate-inbound.sql")))root=root.Parent;
+            if(root is null)throw new InvalidOperationException("Cannot locate the repository SQL fixture migration.");
+            var migration=await File.ReadAllTextAsync(Path.Combine(root.FullName,"scripts/sql/migrate-inbound.sql"));
             await Execute(sql,migration);await Execute(sql,migration);
             var repo=new SqlInboundRepository(settings.ConnectionString,InboundTests.Policy);
             var actor=InboundTests.Actor;var order=InboundTests.Order(quantity:2);

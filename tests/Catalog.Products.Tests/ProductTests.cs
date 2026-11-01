@@ -62,6 +62,7 @@ public static class ProductTests
         await Expect(await buyer.PutAsJsonAsync("/api/products/1",update),400,"immutable product code");
         await Expect(await buyer.DeleteAsync("/api/products/1"),405,"no product delete");
         await InventoryRoleTests(root.FullName);
+        await ProfileApiTests.Run(root.FullName);
         if(Environment.GetEnvironmentVariable("EWMS_PRODUCT_TEST_SERVER") is {Length:>0} server) await SqlProductTests.Run(server);
         Console.WriteLine("PASS: Purchasing-only Product create/edit/list/detail/filter, CSRF, precision/code/supplier validation, concurrency, and receiving-summary roles.");
         return 0;

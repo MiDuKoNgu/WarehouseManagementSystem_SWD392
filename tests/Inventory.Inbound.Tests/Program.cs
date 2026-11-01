@@ -17,11 +17,16 @@ internal static class InboundTests
     public static async Task Main()
     {
         Rules();
+        PutawayRuleTests.Run();
         await ApiSecurity();
+        await PutawayApiTests.Run();
         await ServiceClient();
         var server = Environment.GetEnvironmentVariable("EWMS_INBOUND_TEST_SERVER");
         if (string.IsNullOrWhiteSpace(server)) Console.WriteLine("SKIP SQL: set EWMS_INBOUND_TEST_SERVER for a generated disposable database.");
         else await SqlTests.Run(server);
+        var putawayServer = Environment.GetEnvironmentVariable("EWMS_PUTAWAY_TEST_SERVER");
+        if (string.IsNullOrWhiteSpace(putawayServer)) Console.WriteLine("SKIP Putaway SQL: set EWMS_PUTAWAY_TEST_SERVER for three generated disposable databases.");
+        else await PutawaySqlTests.Run(putawayServer);
         Console.WriteLine("PASS Inbound rules, API authorization/warehouse/CSRF, Procurement forwarding and errors.");
     }
 

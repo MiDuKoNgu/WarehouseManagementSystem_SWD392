@@ -177,11 +177,12 @@ it('retries terminal receipt synchronization without showing serial editing acti
   expect(JSON.parse(String(init?.body)).rowVersion).toBe('AAAAAAAAAAE=');
 });
 
-it('shows real accepted serials waiting for Putaway without offering an inventory mutation', async () => {
+it('shows accepted serial metadata and keeps browsing Putaway read-only until confirmation', async () => {
   const previous = vi.mocked(fetch).getMockImplementation()!;
-  vi.stubGlobal('fetch', vi.fn(async (path: string, init?: RequestInit) => path === '/api/inventory/pending-putaway' ? response([{ serialItemId: 99, serialNumber: 'PENDING-SERIAL-99', productId: 1, inboundId: 1, receiptCode: 'INB-001', manufacturingMonth: 8, manufacturingYear: 2025, itemCondition: 'GOOD', isQuarantined: false, registeredAt: '2026-11-01T04:00:00Z' }]) : previous(path, init)));
+  vi.stubGlobal('fetch', vi.fn(async (path: string, init?: RequestInit) => path.startsWith('/api/putaway/pending?') ? response({ items: [{ serialItemId: 99, serialNumber: 'PENDING-SERIAL-99', productId: 1, originalInboundId: 1, receiptCode: 'INB-001', itemCondition: 'GOOD', isQuarantined: false, receivedAt: '2026-11-01T04:00:00Z', warehouseName: 'Kho A', hasActiveClaim: false, product: { productCode: 'TV-001', productName: 'Ti vi Samsung 55 inch', categoryName: 'Ti vi', brandName: 'Samsung' } }], totalCount: 1, page: 1, pageSize: 20 }) : previous(path, init)));
   window.history.replaceState(null, '', '/warehouse/pending-putaway'); render(<App />);
   await screen.findByRole('heading', { name: 'PENDING-SERIAL-99' });
   expect(screen.getByRole('link', { name: 'INB-001' }).getAttribute('href')).toBe('/warehouse/inbounds/1');
+  expect(screen.getByText('Ti vi Samsung 55 inch')).toBeTruthy();
   expect(vi.mocked(fetch).mock.calls.every(([, init]) => !init?.method || init.method === 'GET')).toBe(true);
 });

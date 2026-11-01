@@ -15,6 +15,9 @@ builder.Services.AddEwmsServiceSecurity(builder.Configuration);
 builder.Services.AddScoped<IProductRepository>(_ => new SqlProductRepository(
     builder.Configuration.GetConnectionString("Catalog") ?? throw new ServiceUnavailableException("Catalog connection is not configured.")));
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped(_ => new ProductStorageProfileRepository(
+    builder.Configuration.GetConnectionString("Catalog")
+    ?? throw new ServiceUnavailableException("Catalog connection is not configured.")));
 builder.Services.AddScoped(_ => new CatalogLookupRepository(
     builder.Configuration.GetConnectionString("Catalog")
     ?? throw new ServiceUnavailableException("Catalog connection is not configured.")));

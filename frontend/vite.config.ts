@@ -5,6 +5,7 @@ export default defineConfig({
     proxy: {
       '/api/inbounds': { target: 'http://localhost:5159', changeOrigin: true },
       '/api/inventory': { target: 'http://localhost:5159', changeOrigin: true },
+      '/api/putaway': { target: 'http://localhost:5159', changeOrigin: true },
       '/api/receiving-orders': { target: 'http://localhost:5136', changeOrigin: true },
       '/api/products': { target: 'http://localhost:5254', changeOrigin: true },
       '/api/admin': { target: 'http://localhost:5062', changeOrigin: true },

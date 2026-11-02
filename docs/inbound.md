@@ -104,7 +104,7 @@ Sau migration, script đối chiếu `Inbound.PurchaseOrderID` với PO trong da
 
 Ngày 01/11/2026 đã chạy script thành công trên ProcurementDB và InventoryDB local `MIDUKONGU`. Output xác nhận cả hai migration đã áp dụng; không có phiếu lịch sử cần reconciliation được báo ra. Lỗi SSPI ở lần kết nối ban đầu đã được khắc phục trong môi trường chạy có quyền phù hợp.
 
-API và frontend tiếp tục dùng `scripts/start-ewms.ps1` và `npm.cmd run dev` trong `frontend`. Vite proxy đưa `/api/inbounds` và `/api/inventory` tới Inventory API, `/api/receiving-orders` tới Procurement API.
+API và frontend tiếp tục dùng `scripts/start-ewms.ps1` và `npm.cmd run dev` trong `frontend`. Vite chuyển toàn bộ `/api` đến WMS.API tại cổng 5062. WMS chuyển `/api/inbounds`, `/api/inventory`, `/api/putaway` tới Inventory API và `/api/receiving-orders` tới Procurement API. Khởi động lại backend và Vite khi chuyển từ cấu hình proxy cũ; xem [API Service](api-service.md).
 
 ## Kiểm chứng
 

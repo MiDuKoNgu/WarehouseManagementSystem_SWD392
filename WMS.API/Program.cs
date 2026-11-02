@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WMS.API.Audit;
+using WMS.API.Gateway;
 using WMS.Audit;
 using WMS.ServiceDefaults;
 
@@ -16,6 +17,7 @@ builder.Services.AddEwmsServiceSecurity(builder.Configuration);
 builder.Services.AddHttpClient("audit-sources", client => client.Timeout = TimeSpan.FromSeconds(15))
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false, AllowAutoRedirect = false });
 builder.Services.AddScoped<AuditGateway>();
+builder.Services.AddApiServiceProxy();
 
 var app = builder.Build();
 app.UseEwmsServiceErrors();
@@ -36,6 +38,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Forward before WMS's audit session lookup: Identity owns login, CSRF and logout,
+// including clearing a stale cookie when its user database is unavailable.
+app.UseRouting();
+app.UseApiServiceProxy();
 app.UseAuthentication();
 app.UseAuthorization();
 

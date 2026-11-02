@@ -15,7 +15,7 @@ Chức năng dành cho `PURCHASING_STAFF`. Admin và nhân viên kho không truy
 .\scripts\start-ewms.ps1
 ```
 
-Lệnh build và khởi chạy sáu service (gồm Inventory và gateway phục vụ Audit Logs); chỉ cần nhập SQL username/password một lần. Server mặc định MIDUKONGU, SQL Authentication. Windows Authentication có thể dùng `-WindowsAuthentication`. Không cần gửi hoặc lưu mật khẩu vào source.
+Lệnh build và khởi chạy sáu service, gồm Inventory và WMS.API làm cửa vào API chung cho frontend; chỉ cần nhập SQL username/password một lần. Server mặc định MIDUKONGU, SQL Authentication. Windows Authentication có thể dùng `-WindowsAuthentication`. Không cần gửi hoặc lưu mật khẩu vào source.
 
 Giữ terminal mở. Ctrl+C dừng các tiến trình backend do lệnh này tạo. Nếu port đã được dùng, lệnh sẽ báo lỗi thay vì tự dừng tiến trình khác. Log nằm trong `.local/logs/`, không được đưa vào Git.
 
@@ -65,12 +65,13 @@ Giới hạn: `.xlsx`, 2 MB, 500 dòng dữ liệu; bỏ qua dòng hoàn toàn t
 
 | Service | Port | Trách nhiệm |
 |---|---|---|
+| WMS.API | 5062 | API Service nhận yêu cầu frontend, chuyển tiếp đến service nghiệp vụ và tổng hợp audit |
 | Identity.API | 5140 | Phiên, quyền, CSRF, tên người tạo |
 | Catalog.API | 5254 | Nhà cung cấp, sản phẩm, quan hệ SupplierProduct từ CatalogDB |
 | Warehouse.API | 5104 | Kho ACTIVE từ WarehouseDB |
 | Procurement.API | 5136 | PO, dòng PO, template/preview/confirm, AuditLog trong ProcurementDB |
 
-Frontend gọi cùng origin qua Vite proxy. Business APIs kiểm tra cookie với Identity, không tin user ID/role từ frontend. POST xác thực CSRF tại Identity. Không đọc chéo database từ Procurement.API; các tham chiếu được kiểm tra qua API Catalog/Warehouse.
+Frontend gọi cùng origin qua Vite proxy `/api` đến WMS.API. WMS chuyển `/api/purchase-orders` tới Procurement.API, bao gồm tạo/sửa PO và upload/download Excel. Business APIs kiểm tra cookie với Identity, không tin user ID/role từ frontend. POST xác thực CSRF tại Identity. Không đọc chéo database từ Procurement.API; các tham chiếu được kiểm tra qua API Catalog/Warehouse. Xem [API Service](api-service.md) về định tuyến, cookie và cấu hình triển khai.
 
 Các biến cấu hình khi chạy từng service riêng: `ConnectionStrings__Identity`, `ConnectionStrings__Catalog`, `ConnectionStrings__Warehouse`, `ConnectionStrings__Procurement`. Có thể đổi địa chỉ upstream bằng `Services__Identity`, `Services__Catalog`, `Services__Warehouse`. Production cần HTTPS, reverse proxy cùng origin và cấu hình kết nối/chứng chỉ phù hợp; Vite proxy chỉ dùng để phát triển.
 

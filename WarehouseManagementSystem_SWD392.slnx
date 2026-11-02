@@ -148,6 +148,7 @@
     <Project Path="tests/Procurement.Tests/Procurement.Tests.csproj" />
     <Project Path="tests/WMS.Audit.Source.Tests/WMS.Audit.Source.Tests.csproj" />
     <Project Path="tests/WMS.Audit.Gateway.Tests/WMS.Audit.Gateway.Tests.csproj" />
+    <Project Path="tests/WMS.ApiService.Tests/WMS.ApiService.Tests.csproj" />
   </Folder>
   <Folder Name="/Frontend/src/features/dashboard/" />
   <Folder Name="/Frontend/src/features/dashboard/pages/">
@@ -169,6 +170,7 @@
     <File Path="scripts/tests/start-ewms.tests.ps1" />
   </Folder>
   <Folder Name="/Documentation/">
+    <File Path="docs/api-service.md" />
     <File Path="docs/purchase-orders.md" />
     <File Path="docs/audit-logs.md" />
   </Folder>

@@ -6,9 +6,9 @@ Frontend React + TypeScript, chạy bằng Vite. Trang mặc định là giao di
 
 Mở terminal tại thư mục `frontend`, chạy `npm install`, sau đó `npm run dev` và mở địa chỉ terminal hiển thị. Dùng `npm run build` để kiểm tra TypeScript và build; `npm run preview` để xem bản build.
 
-Trang đăng nhập đã kết nối Identity.API, dùng cookie HttpOnly và phân quyền admin, mua hàng, kho. Ghi nhớ đăng nhập giữ phiên 14 ngày; phiên thường tối đa 8 giờ. Nhân viên kho cần được gán WarehouseID.
+Trang đăng nhập gọi Identity.API thông qua WMS.API, dùng cookie HttpOnly và phân quyền admin, mua hàng, kho. Ghi nhớ đăng nhập giữ phiên 14 ngày; phiên thường tối đa 8 giờ. Nhân viên kho cần được gán WarehouseID.
 
-Nhân viên mua hàng có danh sách, tạo PO nháp thủ công, chi tiết PO và import Excel có xem trước/kiểm tra lỗi/xác nhận. Xem hướng dẫn đầy đủ tại [docs/purchase-orders.md](../docs/purchase-orders.md). Chạy `scripts/start-ewms.ps1` từ thư mục solution để khởi động các backend cần thiết; Vite proxy chuyển `/api` tới đúng service.
+Nhân viên mua hàng có danh sách, tạo PO nháp thủ công, chi tiết PO và import Excel có xem trước/kiểm tra lỗi/xác nhận. Xem hướng dẫn đầy đủ tại [docs/purchase-orders.md](../docs/purchase-orders.md). Chạy `scripts/start-ewms.ps1` từ thư mục solution để khởi động đủ sáu backend; Vite proxy chuyển toàn bộ `/api` đến WMS.API tại `http://localhost:5062`, rồi WMS chuyển tiếp đến service phụ trách. Cần khởi động lại backend và Vite nếu đang dùng cấu hình cũ. Xem [API Service](../docs/api-service.md) về bảng định tuyến và cấu hình production.
 
 ## Tổ chức
 

@@ -14,7 +14,7 @@ Dừng backend cũ bằng Ctrl+C, chạy tại thư mục solution:
 .\scripts\start-ewms.ps1
 ```
 
-Nhập SQL username/password. Lệnh chạy sáu service: Identity 5140, Catalog 5254, Warehouse 5104, Procurement 5136, Inventory 5159, WMS gateway 5062. Gateway không có database riêng. Giữ terminal mở.
+Nhập SQL username/password. Lệnh chạy sáu service: Identity 5140, Catalog 5254, Warehouse 5104, Procurement 5136, Inventory 5159, WMS gateway 5062. WMS.API là cửa vào API chung cho frontend và không có database riêng. Giữ terminal mở.
 
 Dừng/chạy lại frontend để nhận proxy mới:
 
@@ -24,6 +24,8 @@ npm.cmd run dev
 ```
 
 Đăng nhập Admin, chọn **Administration → Audit Logs** hoặc mở `/admin/audit-logs`.
+
+Vite chuyển toàn bộ `/api` đến WMS.API. Các route `/api/admin/audit-logs` vẫn do controller cục bộ của WMS xử lý và kiểm tra role `ADMIN`; chúng không bị chuyển tiếp như các route nghiệp vụ khác. Gateway tiếp tục gọi trực tiếp API nguồn của Inventory/Procurement và Identity để tổng hợp dữ liệu. Xem [API Service](api-service.md).
 
 ## Lọc và phân trang
 

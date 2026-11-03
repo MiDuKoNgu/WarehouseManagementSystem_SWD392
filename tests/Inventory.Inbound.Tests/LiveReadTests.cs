@@ -21,7 +21,7 @@ internal static class LiveReadTests
         await using var db = factory.CreateDbContext();
         var warehouses = await db.Inbounds.AsNoTracking().Where(x => x.WarehouseId != null)
             .Select(x => x.WarehouseId!.Value).Distinct().ToArrayAsync();
-        var repository = new SqlInboundRepository(factory, InboundTests.Policy);
+        var repository = new InboundRepository(factory, InboundTests.Policy);
         var queries = new ReceiptQueries(factory);
         var summaries = new ReceivingSummaryRepository(factory);
         var count = 0;

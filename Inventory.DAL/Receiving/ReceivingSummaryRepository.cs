@@ -1,10 +1,7 @@
-﻿using Inventory.Models.Receiving;
+using Inventory.Models.Receiving;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inventory.DAL.Receiving;
-
-public interface IReceivingSummaryRepository
-{ Task<PurchaseOrderReceivingSummary> GetAsync(long purchaseOrderId, CancellationToken ct); }
 
 public sealed class ReceivingSummaryRepository(IDbContextFactory<InventoryDbContext> factory) : IReceivingSummaryRepository
 {

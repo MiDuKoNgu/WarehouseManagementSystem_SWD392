@@ -11,7 +11,7 @@ using WMS.ServiceDefaults;
 namespace Inventory.API.Controllers;
 
 [ApiController, Route("api/inbounds"), Authorize(Roles = "WAREHOUSE_STAFF")]
-public sealed class InboundsController(SqlInboundRepository receipts, ReceivingOrderClient orders, ReceiptPolicy policy, ReceiptQueries queries) : ControllerBase
+public sealed class InboundsController(InboundRepository receipts, ReceivingOrderClient orders, ReceiptPolicy policy, ReceiptQueries queries) : ControllerBase
 {
     private ReceiptActor Actor => int.TryParse(User.FindFirstValue("warehouse_id"), out var warehouse) && warehouse > 0
         ? new(int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!), User.FindFirstValue("full_name") ?? User.Identity!.Name!, warehouse)
@@ -124,14 +124,4 @@ public sealed class InboundsController(SqlInboundRepository receipts, ReceivingO
         var h=await Header(id,ct); var order=await orders.FindAsync(h.PurchaseOrderId,ct);
         return new(h,order,await receipts.ProgressAsync(order,id,ct),await receipts.ItemsAsync(id,ct),policy);
     }
-}
-
-[ApiController, Route("api/inventory"), Authorize(Roles = "WAREHOUSE_STAFF")]
-public sealed class ReceivingQueriesController(ReceiptQueries queries) : ControllerBase
-{
-    private int Warehouse => int.TryParse(User.FindFirstValue("warehouse_id"),out var id) && id>0 ? id : throw new ReceiptException(403,"Tài khoản chưa được phân công kho.");
-    [HttpGet("receiving-reservations/{token:guid}")]
-    public async Task<IActionResult> Reservation(Guid token,CancellationToken ct) => Ok(await queries.ReservationAsync(token,Warehouse,ct));
-    [HttpGet("pending-putaway")]
-    public async Task<IActionResult> Pending(CancellationToken ct) => Ok(await queries.PendingAsync(Warehouse,ct));
 }

@@ -43,7 +43,7 @@ internal static class SqlTransactionTests
                     NewValues nvarchar(max) NULL, Status varchar(20) NOT NULL, CreatedAt datetime2 NOT NULL,
                     CONSTRAINT RejectAudit CHECK (Action = 'REJECT_ALL_CREATION_ACTIONS'));
                 """, connection)) await schema.ExecuteNonQueryAsync();
-            var repo = new SqlPurchaseOrderRepository(baseConnection.ConnectionString);
+            var repo = new PurchaseOrderRepository(baseConnection.ConnectionString);
             var request = new CreatePurchaseOrder(1, 1, null, "SQL integration", [new(1, 3), new(2, 5)]);
             var failed = false;
             try { await repo.CreateAsync(request, 22, "SQL Test", "CREATE_PO", CancellationToken.None); }
@@ -80,7 +80,7 @@ internal static class SqlTransactionTests
             }));
             ProcurementTests.Check(transitionResults.Count(value => value is not null) == 1, "concurrent confirmation commits once");
             var confirmed = transitionResults.Single(value => value is not null)!;
-            var reservationRepository = new SqlReceivingReservationRepository(baseConnection.ConnectionString);
+            var reservationRepository = new ReceivingReservationRepository(baseConnection.ConnectionString);
             var token = Guid.NewGuid();
             var wrongWarehouseBlocked = false;
             try { await reservationRepository.ReserveAsync(confirmed.PurchaseOrderId, token, 99, 24, CancellationToken.None); }

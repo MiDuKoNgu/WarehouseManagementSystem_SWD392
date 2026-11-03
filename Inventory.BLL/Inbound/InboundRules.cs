@@ -2,9 +2,6 @@ using Inventory.Models.Inbound;
 
 namespace Inventory.BLL.Inbound;
 
-public sealed class ReceiptException(int statusCode, string message) : Exception(message)
-{ public int StatusCode { get; } = statusCode; }
-
 public static class InboundRules
 {
     public static SaveReceiptItem Validate(SaveReceiptItem value, ReceiptPolicy policy, DateOnly today)

@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Catalog.Products.Tests;
 
-public static class ProductTests
+public static partial class ProductTests
 {
     public static async Task<int> Main()
     {
@@ -91,31 +91,4 @@ public static class ProductTests
     private static async Task Expect(HttpResponseMessage response,int status,string message)=>Check((int)response.StatusCode==status,$"{message}: {(int)response.StatusCode} {await response.Content.ReadAsStringAsync()}");
     private static HttpClient Client<T>(WebApplicationFactory<T> factory,string role) where T:class
     {var client=factory.CreateClient(new(){AllowAutoRedirect=false});if(role!="")client.DefaultRequestHeaders.Add("Cookie","EWMS.Session="+role);return client;}
-    private sealed class SessionStub:HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken ct)
-        {
-            if(request.RequestUri!.AbsolutePath.EndsWith("validate-csrf")) return Task.FromResult(new HttpResponseMessage(request.Headers.TryGetValues("X-CSRF-TOKEN",out var values)&&values.Single()=="valid"?HttpStatusCode.NoContent:HttpStatusCode.BadRequest));
-            var cookie=string.Join(";",request.Headers.GetValues("Cookie"));var role=cookie.Contains("admin")?"ADMIN":cookie.Contains("keeper")?"WAREHOUSE_STAFF":"PURCHASING_STAFF";
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK){Content=JsonContent.Create(new{userId=22,username="test",fullName="Product Tester",role,warehouseId=1})});
-        }
-    }
-    private sealed class FakeReceiving:IReceivingSummaryRepository
-    {public Task<PurchaseOrderReceivingSummary> GetAsync(long id,CancellationToken ct)=>Task.FromResult(new PurchaseOrderReceivingSummary(id,false,0,[]));}
-    private sealed class FakeProducts:IProductRepository
-    {
-        public ProductDetail? Product;public ProductQuery? LastQuery;private int _version;
-        public Task<ProductPage> ListAsync(ProductQuery query,CancellationToken ct){LastQuery=query;return Task.FromResult(new ProductPage(Product is null?[]:[Product],Product is null?0:1,query.Page,query.PageSize));}
-        public Task<ProductDetail?> FindAsync(int id,CancellationToken ct)=>Task.FromResult(id==1?Product:null);
-        public Task<ProductOptions> OptionsAsync(CancellationToken ct)=>Task.FromResult(new ProductOptions([new(1,"Điều hòa")],[new(1,"Daikin")],[new(1,"Supplier")]));
-        public Task<ProductDetail> SaveAsync(int? id,ProductInput input,int actor,byte[]? version,CancellationToken ct)
-        {
-            if(id is not null && Product is null)throw new ProductNotFoundException();
-            if(id is not null && Product!.ProductCode!=input.ProductCode)throw new ProductValidationException(["Mã không được đổi."]);
-            if(id is not null && Product!.RowVersion!=Convert.ToBase64String(version!))throw new ProductConflictException("Stale version");
-            if(id is null && Product is not null)throw new ProductConflictException("Duplicate code");
-            Product=new(1,input.ProductCode,input.ProductName,input.Model,input.Unit,1,"Điều hòa",1,"Daikin",input.Status,input.Specifications,input.LengthCm,input.WidthCm,input.HeightCm,input.GrossWeightKg,[new(1,"Supplier")],Product?.CreatedByUserId??actor,DateTime.UtcNow,null,Convert.ToBase64String(BitConverter.GetBytes((long)++_version)));
-            return Task.FromResult(Product);
-        }
-    }
 }

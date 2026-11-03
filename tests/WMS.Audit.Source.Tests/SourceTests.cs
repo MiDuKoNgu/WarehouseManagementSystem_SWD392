@@ -11,7 +11,7 @@ using WMS.Audit;
 
 namespace WMS.Audit.Source.Tests;
 
-public static class SourceTests
+public static partial class SourceTests
 {
     public static async Task<int> Main()
     {
@@ -76,14 +76,4 @@ public static class SourceTests
     public static void Check(bool condition, string message) { if (!condition) throw new Exception("FAIL: " + message); }
     private static async Task Status(HttpResponseMessage response, int expected, string message) =>
         Check((int)response.StatusCode == expected, $"{message}: expected {expected}, got {(int)response.StatusCode} {await response.Content.ReadAsStringAsync()}");
-
-    private sealed class IdentityStub : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            var cookie = string.Join(";", request.Headers.GetValues("Cookie"));
-            var role = cookie.Contains("admin") ? "ADMIN" : cookie.Contains("buyer") ? "PURCHASING_STAFF" : "WAREHOUSE_STAFF";
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(new { userId = 1, username = "source-test", fullName = "Source Test", role, warehouseId = 1 }) });
-        }
-    }
 }

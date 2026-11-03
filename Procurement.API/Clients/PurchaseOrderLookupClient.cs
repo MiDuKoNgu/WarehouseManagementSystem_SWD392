@@ -4,7 +4,7 @@ using Procurement.Models.PurchaseOrders;
 
 namespace Procurement.API.Clients;
 
-public sealed class PurchaseOrderLookupClient(IHttpClientFactory clients, IHttpContextAccessor context,
+public sealed partial class PurchaseOrderLookupClient(IHttpClientFactory clients, IHttpContextAccessor context,
     IConfiguration configuration) : IPurchaseOrderLookup
 {
     public async Task<PurchaseOrderOptions> GetOptionsAsync(CancellationToken ct)
@@ -36,5 +36,4 @@ public sealed class PurchaseOrderLookupClient(IHttpClientFactory clients, IHttpC
         return await response.Content.ReadFromJsonAsync<T>(cancellationToken: ct)
             ?? throw new HttpRequestException($"Lookup service {service} returned empty data.");
     }
-    private sealed record DisplayName(int UserId, string FullName);
 }

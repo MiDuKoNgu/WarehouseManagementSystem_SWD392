@@ -178,7 +178,7 @@
             <mxPoint x="1405" y="3567" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="64" value="SqlUserRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="64" value="UserRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="1273" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="65" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -508,7 +508,7 @@
             <mxPoint x="2025" y="4543" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="82" value="SqlUserRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="82" value="UserRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="1893" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="83" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -961,7 +961,7 @@
             <mxPoint x="2645" y="5269" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="99" value="SqlPurchaseOrderRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="99" value="PurchaseOrderRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="2513" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="100" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -1093,7 +1093,7 @@
             <mxPoint x="2018" y="1907" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="22" value="12. CatalogLookupRepository.GetAsync → SELECT supplier/product" style="endArrow=block;endFill=1;dashed=0;strokeColor=#334155;strokeWidth=1.4;fontSize=14;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=282;verticalAlign=bottom;spacingBottom=8;rounded=0;" edge="1" parent="1">
+        <mxCell id="22" value="12. CatalogRepository.GetAsync → SELECT supplier/product" style="endArrow=block;endFill=1;dashed=0;strokeColor=#334155;strokeWidth=1.4;fontSize=14;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=282;verticalAlign=bottom;spacingBottom=8;rounded=0;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="2032" y="2003" as="sourcePoint" />
             <mxPoint x="2328" y="2003" as="targetPoint" />
@@ -1117,7 +1117,7 @@
             <mxPoint x="2018" y="2361" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="28" value="16. WarehouseLookupRepository.GetAsync → SELECT kho hoạt động" style="endArrow=block;endFill=1;dashed=0;strokeColor=#334155;strokeWidth=1.4;fontSize=14;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=282;verticalAlign=bottom;spacingBottom=8;rounded=0;" edge="1" parent="1">
+        <mxCell id="28" value="16. WarehouseRepository.GetAsync → SELECT kho hoạt động" style="endArrow=block;endFill=1;dashed=0;strokeColor=#334155;strokeWidth=1.4;fontSize=14;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=282;verticalAlign=bottom;spacingBottom=8;rounded=0;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="2032" y="2457" as="sourcePoint" />
             <mxPoint x="2328" y="2457" as="targetPoint" />
@@ -1407,7 +1407,7 @@
             <mxPoint x="2335" y="5733" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="96" value="SqlPurchaseOrderRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="96" value="PurchaseOrderRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="2203" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="97" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -1881,7 +1881,7 @@
             <mxPoint x="2955" y="4927" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="91" value="SqlPurchaseOrderRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="91" value="PurchaseOrderRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="2823" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="92" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -2074,7 +2074,7 @@
             <mxPoint x="126" y="-18" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="30" value="20. Lấy tên người tạo qua lookup.GetCreatorNameAsync (Identity.API → SqlUserRepository → IdentityDB)" style="endArrow=block;endFill=1;dashed=0;strokeColor=#334155;strokeWidth=1.4;fontSize=14;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=235;verticalAlign=bottom;spacingBottom=8;rounded=0;" edge="1" parent="1">
+        <mxCell id="30" value="20. Lấy tên người tạo qua lookup.GetCreatorNameAsync (Identity.API → UserRepository → IdentityDB)" style="endArrow=block;endFill=1;dashed=0;strokeColor=#334155;strokeWidth=1.4;fontSize=14;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=235;verticalAlign=bottom;spacingBottom=8;rounded=0;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1412" y="2967" as="sourcePoint" />
             <mxPoint x="1420" y="2999" as="targetPoint" />
@@ -2287,7 +2287,7 @@
             <mxPoint x="1405" y="6185" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="99" value="SqlInboundRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="99" value="InboundRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="1273" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="100" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -2567,7 +2567,7 @@
             <mxPoint x="2328" y="3405" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="38" value="26. SqlReceivingReservationRepository.ReserveAsync" style="endArrow=block;endFill=1;dashed=0;strokeColor=#334155;strokeWidth=1.4;fontSize=14;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=282;verticalAlign=bottom;spacingBottom=8;rounded=0;" edge="1" parent="1">
+        <mxCell id="38" value="26. ReceivingReservationRepository.ReserveAsync" style="endArrow=block;endFill=1;dashed=0;strokeColor=#334155;strokeWidth=1.4;fontSize=14;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=282;verticalAlign=bottom;spacingBottom=8;rounded=0;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="2342" y="3633" as="sourcePoint" />
             <mxPoint x="2638" y="3633" as="targetPoint" />
@@ -2823,7 +2823,7 @@
             <mxPoint x="1715" y="3671" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="65" value="SqlInboundRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="65" value="InboundRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="1583" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="66" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -3138,7 +3138,7 @@
             <mxPoint x="1405" y="5647" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="92" value="SqlInboundRepository ReceiptQueries" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="92" value="InboundRepository ReceiptQueries" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="1273" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="93" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -3174,7 +3174,7 @@
             <mxPoint x="2645" y="5647" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="100" value="SqlReceivingReservationRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="100" value="ReceivingReservationRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="2513" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="101" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -3624,7 +3624,7 @@
             <mxPoint x="1715" y="3727" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="65" value="SqlPutawayRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="65" value="PutawayRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="1583" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="66" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -3958,7 +3958,7 @@
             <mxPoint x="1715" y="4029" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="68" value="SqlPutawayRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="68" value="PutawayRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="1583" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="69" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -4344,7 +4344,7 @@
             <mxPoint x="2335" y="4855" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="85" value="Identity.API + DAL AuthController / SqlUserRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="85" value="Identity.API + DAL AuthController / UserRepository" style="rounded=0;fillColor=#f8fafc;strokeColor=#64748b;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="2203" y="140" width="264" height="80" as="geometry" />
         </mxCell>
         <mxCell id="86" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">

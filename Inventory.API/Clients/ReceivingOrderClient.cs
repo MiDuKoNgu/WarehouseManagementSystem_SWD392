@@ -4,7 +4,7 @@ using Inventory.Models.Inbound;
 
 namespace Inventory.API.Clients;
 
-public sealed class ReceivingOrderClient(IHttpClientFactory clients, IHttpContextAccessor context, IConfiguration configuration)
+public sealed partial class ReceivingOrderClient(IHttpClientFactory clients, IHttpContextAccessor context, IConfiguration configuration)
 {
     public Task<ReceiptOrder[]> ListAsync(CancellationToken ct) => Send<ReceiptOrder[]>("", null, ct);
     public Task<ReceiptOrder> FindAsync(long id, CancellationToken ct) => Send<ReceiptOrder>($"/{id}", null, ct);
@@ -31,5 +31,4 @@ public sealed class ReceivingOrderClient(IHttpClientFactory clients, IHttpContex
         if (response.StatusCode == System.Net.HttpStatusCode.NoContent) return default!;
         return await response.Content.ReadFromJsonAsync<T>(cancellationToken: ct) ?? throw new HttpRequestException("Empty receiving order response.");
     }
-    private sealed record ServiceError(string Message);
 }

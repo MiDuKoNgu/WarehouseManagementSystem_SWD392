@@ -140,10 +140,3 @@ public sealed class InventoryDbContext(DbContextOptions<InventoryDbContext> opti
         model.Entity<SerialMovement>().HasOne<Inventory.Models.Entities.Inbound>().WithMany().HasForeignKey(x => x.InboundId).OnDelete(DeleteBehavior.NoAction);
     }
 }
-
-// Compatibility factory for CLI callers and integration tests; API uses AddDbContextFactory.
-public sealed class InventoryContextFactory(string connectionString) : IDbContextFactory<InventoryDbContext>
-{
-    public InventoryDbContext CreateDbContext() => new(new DbContextOptionsBuilder<InventoryDbContext>()
-        .UseSqlServer(connectionString).Options);
-}

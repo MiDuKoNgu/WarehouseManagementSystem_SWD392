@@ -15,7 +15,7 @@ Các file chính:
 | Inventory Models | `Inventory.Models/Putaway/PutawayContracts.cs` | DTO serial, profile, vị trí, capacity, request và result |
 | Inventory BLL | `Inventory.BLL/Putaway/PutawayRules.cs` | Validation cây, condition, rule và sức chứa |
 | Inventory BLL | `Inventory.BLL/Putaway/PutawayService.cs` | Điều phối, kiểm request và điểm nối operation guard |
-| Inventory DAL | `Inventory.DAL/Putaway/SqlPutawayRepository.cs` | Đọc authoritative, khóa và transaction |
+| Inventory DAL | `Inventory.DAL/Putaway/PutawayRepository.cs` | Đọc authoritative, khóa và transaction |
 | Inventory API | `Inventory.API/Controllers/PutawayController.cs` | API dành cho Warehouse Staff |
 | Inventory API | `Inventory.API/Program.cs` | DI và xử lý lỗi Putaway |
 | Inventory DAL | `Inventory.DAL/Receiving/ReceiptQueries.cs` | Giữ route cũ và cho phép nguồn nhận gốc tùy chọn |

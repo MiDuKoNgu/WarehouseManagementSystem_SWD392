@@ -14,7 +14,7 @@ internal static class LiveReadTests
             DataSource = server, InitialCatalog = "ProcurementDB", IntegratedSecurity = true,
             TrustServerCertificate = true, ConnectTimeout = 5
         }.ConnectionString;
-        var repository = new SqlPurchaseOrderRepository(connection);
+        var repository = new PurchaseOrderRepository(connection);
         var orders = await repository.ListAsync(default);
         foreach (var order in orders.Take(10))
             ProcurementTests.Check(await repository.FindAsync(order.PurchaseOrderId, default) is not null, "live PO detail");

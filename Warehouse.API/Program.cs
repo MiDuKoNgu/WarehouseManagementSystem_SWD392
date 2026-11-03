@@ -16,7 +16,7 @@ builder.Services.AddDbContextFactory<WarehouseDbContext>(options => options.UseS
     builder.Configuration.GetConnectionString("Warehouse")
     ?? throw new ServiceUnavailableException("Warehouse connection is not configured.")));
 builder.Services.AddScoped<PutawayLayoutRepository>();
-builder.Services.AddScoped<WarehouseLookupRepository>();
+builder.Services.AddScoped<WarehouseRepository>();
 
 var app = builder.Build();
 app.UseEwmsServiceErrors();

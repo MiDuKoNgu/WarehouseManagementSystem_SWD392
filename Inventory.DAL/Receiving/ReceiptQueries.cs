@@ -1,10 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace Inventory.DAL.Receiving;
-
-public sealed record ReservationProof(bool Exists, bool Terminal, long PurchaseOrderId, int WarehouseId);
-public sealed record PendingSerial(long SerialItemId, string SerialNumber, int ProductId, long? InboundId,
-    string? ReceiptCode, int? ManufacturingMonth, int? ManufacturingYear, string ItemCondition, bool IsQuarantined, DateTime RegisteredAt);
 
 public sealed class ReceiptQueries(IDbContextFactory<InventoryDbContext> factory)
 {

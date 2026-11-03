@@ -22,7 +22,7 @@ builder.Services.AddEwmsServiceSecurity(builder.Configuration);
 builder.Services.AddDbContextFactory<InventoryDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("Inventory") ?? throw new ServiceUnavailableException("Inventory connection is not configured.")));
 builder.Services.AddScoped<IPutawayOperationGuard, CurrentSchemaPutawayGuard>();
-builder.Services.AddScoped<IPutawayRepository>(provider => new SqlPutawayRepository(
+builder.Services.AddScoped<IPutawayRepository>(provider => new PutawayRepository(
     provider.GetRequiredService<IDbContextFactory<InventoryDbContext>>(),
     provider.GetRequiredService<IPutawayOperationGuard>(),
     builder.Configuration["Putaway:CatalogDatabase"] ?? "CatalogDB",
@@ -32,7 +32,7 @@ builder.Services.AddSingleton(new ReceiptPolicy(
     builder.Configuration.GetValue<bool>("Inbound:AllowMultipleDrafts"),
     builder.Configuration.GetValue<bool>("Inbound:AcceptDamaged"),
     builder.Configuration.GetValue<bool>("Inbound:AllowCancellation")));
-builder.Services.AddScoped(provider => new SqlInboundRepository(
+builder.Services.AddScoped(provider => new InboundRepository(
     provider.GetRequiredService<IDbContextFactory<InventoryDbContext>>(),
     provider.GetRequiredService<ReceiptPolicy>()));
 builder.Services.AddScoped(provider => new ReceiptQueries(provider.GetRequiredService<IDbContextFactory<InventoryDbContext>>()));

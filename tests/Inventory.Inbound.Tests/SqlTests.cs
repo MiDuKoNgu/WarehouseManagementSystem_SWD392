@@ -27,7 +27,7 @@ internal static class SqlTests
             if(root is null)throw new InvalidOperationException("Cannot locate the repository SQL fixture migration.");
             var migration=await File.ReadAllTextAsync(Path.Combine(root.FullName,"scripts/sql/migrate-inbound.sql"));
             await Execute(sql,migration);await Execute(sql,migration);
-            var repo=new SqlInboundRepository(settings.ConnectionString,InboundTests.Policy);
+            var repo=new InboundRepository(settings.ConnectionString,InboundTests.Policy);
             var actor=InboundTests.Actor;var order=InboundTests.Order(quantity:2);
             var first=await repo.CreateAsync(order,"Batch1",actor,Ct,Guid.NewGuid());
             var header=await Header(repo,first);
@@ -90,7 +90,7 @@ internal static class SqlTests
             Check(await repo.AbortCreationAsync(raceOrder,actor,abortToken,"request failed",Ct),"failed creation fenced");
             await Reject(()=>repo.CreateAsync(raceOrder,null,actor,Ct,abortToken),409,"aborted token cannot create late draft");
             Check((await new ReceiptQueries(settings.ConnectionString).ReservationAsync(abortToken,1,Ct)).Terminal,"aborted creation gives terminal release proof");
-            var singlePolicy=new SqlInboundRepository(settings.ConnectionString,new(false,false,false));
+            var singlePolicy=new InboundRepository(settings.ConnectionString,new(false,false,false));
             var singleOrder=InboundTests.Order(3,1);
             var only=await singlePolicy.CreateAsync(singleOrder,null,actor,Ct);
             await Reject(()=>singlePolicy.CreateAsync(singleOrder,null,actor,Ct),409,"single open draft policy enforced under transaction lock");
@@ -107,7 +107,7 @@ internal static class SqlTests
             await cleanup.ExecuteNonQueryAsync();
         }
     }
-    private static async Task<ReceiptHeader> Header(SqlInboundRepository repo,long id)=>await repo.FindAsync(id,InboundTests.Actor,Ct)??throw new Exception("Missing receipt");
+    private static async Task<ReceiptHeader> Header(InboundRepository repo,long id)=>await repo.FindAsync(id,InboundTests.Actor,Ct)??throw new Exception("Missing receipt");
     private static SaveReceiptItem Item(ReceiptHeader header,string serial)=>InboundTests.Valid with{Serial=serial,RowVersion=header.RowVersion,ManufacturingMonth=1};
     private static async Task Reject(Func<Task> action,int expected,string name)
     {try{await action();}catch(ReceiptException e)when(e.StatusCode==expected){return;}throw new Exception("FAIL expected SQL rejection: "+name);}

@@ -38,7 +38,7 @@ internal static class SqlProductTests
             var supplier = new Supplier { SupplierName = "Test supplier" };
             db.AddRange(category, brand, supplier);
             await db.SaveChangesAsync();
-            var repo = new SqlProductRepository(connection);
+            var repo = new ProductRepository(connection);
             var input = ProductTests.Valid();
             ProductService.Validate(input);
             input.CategoryId = category.CategoryId; input.BrandId = brand.BrandId; input.SupplierIds = [supplier.SupplierId];
@@ -60,7 +60,7 @@ internal static class SqlProductTests
             ProductTests.Check(page.TotalCount == 1 && page.Items.Length == 1, "LINQ filters and count");
             var literal = await repo.ListAsync(new() { Search = "%" }, default);
             ProductTests.Check(literal.TotalCount == 0, "search escapes SQL wildcards");
-            var lookup = await new CatalogLookupRepository(connection).GetAsync(default);
+            var lookup = await new CatalogRepository(connection).GetAsync(default);
             ProductTests.Check(lookup.Products.Single().SupplierIds.SequenceEqual(new[] { supplier.SupplierId }), "lookup supplier projection");
             var profile = await new ProductStorageProfileRepository(connection).FindAsync(saved.ProductId, default);
             ProductTests.Check(profile!.RowVersion == updated.RowVersion && profile.BrandName == brand.BrandName, "storage profile projection");

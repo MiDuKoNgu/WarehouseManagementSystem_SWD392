@@ -14,7 +14,7 @@ using Warehouse.Models.Lookups;
 
 namespace Catalog.Products.Tests;
 
-internal static class ProfileApiTests
+internal static partial class ProfileApiTests
 {
     public static async Task Main()
     {
@@ -99,15 +99,4 @@ internal static class ProfileApiTests
         => Check((int)response.StatusCode==status,$"{label}: {(int)response.StatusCode} {await response.Content.ReadAsStringAsync()}");
     private static void Check(bool value,string message)
     {if(!value)throw new Exception("FAIL: "+message);}
-    private sealed class IdentityStub:HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken ct)
-        {
-            var cookie=string.Join(";",request.Headers.GetValues("Cookie"));
-            var role=cookie.Contains("admin")?"ADMIN":cookie.Contains("buyer")?"PURCHASING_STAFF":"WAREHOUSE_STAFF";
-            int? warehouseId=cookie.Contains("unassigned")?null:cookie.Contains("staff2")?2:1;
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-            {Content=JsonContent.Create(new {userId=22,username="profile-test",fullName="Profile Reader",role,warehouseId})});
-        }
-    }
 }

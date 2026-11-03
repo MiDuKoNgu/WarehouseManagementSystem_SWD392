@@ -1,4 +1,4 @@
-﻿# Inbound — Phiếu nhập kho
+# Inbound — Phiếu nhập kho
 
 ## Phạm vi
 
@@ -10,8 +10,8 @@ Nguồn yêu cầu: `PROMPT_AI_CODING.md.docx`, `EWMS_Business_Requirements_AI_C
 
 1. Đăng nhập Warehouse Staff và mở **Phiếu nhập kho** ở `/warehouse/inbounds`.
 2. Tạo phiếu từ PO đã xác nhận thuộc kho của tài khoản và còn số lượng nhận.
-3. Chọn dòng PO, tháng/năm sản xuất, tình trạng và ghi chú; nhập Serial bằng tay, camera hoặc ảnh tem.
-4. Camera tự điền Serial sau khi đọc ổn định. Ảnh chụp/tải lên tự điền khi chỉ có một ứng viên; nếu nhiều mã hoặc barcode/OCR khác nhau thì chọn mã phù hợp. Kiểm tra ô Serial rồi bấm thêm để lưu vào database.
+3. Chọn dòng PO, tháng/năm sản xuất; nhập Serial bằng tay, camera hoặc ảnh tem, sau đó chọn tình trạng hàng và ghi chú tình trạng.
+4. Camera tự điền Serial sau khi đọc ổn định. Ảnh chụp/tải lên tự điền khi chỉ có một ứng viên; nếu nhiều mã hoặc barcode/OCR khác nhau thì chọn mã phù hợp. Kiểm tra ô Serial, chọn tình trạng hàng và nhập ghi chú rồi bấm thêm để lưu vào database.
 5. Trong DRAFT có thể sửa Serial hoặc hủy hiệu lực dòng nhập sai. Tùy chọn giữ tháng/năm giúp nhập tiếp cùng lô; đổi sản phẩm cần kiểm tra lại thông tin.
 6. Hoàn tất sau khi kiểm tra danh sách. Màn hình hàng chờ xếp `/warehouse/pending-putaway` hiển thị Serial đã nhận, chưa có vị trí lưu kho.
 

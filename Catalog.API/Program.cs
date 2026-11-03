@@ -1,3 +1,5 @@
+using Catalog.DAL;
+using Microsoft.EntityFrameworkCore;
 using Catalog.DAL.Repositories;
 using Catalog.BLL.Products;
 using Microsoft.AspNetCore.Mvc;
@@ -12,15 +14,12 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(options => options
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddEwmsServiceSecurity(builder.Configuration);
-builder.Services.AddScoped<IProductRepository>(_ => new SqlProductRepository(
+builder.Services.AddDbContextFactory<CatalogDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("Catalog") ?? throw new ServiceUnavailableException("Catalog connection is not configured.")));
+builder.Services.AddScoped<IProductRepository, SqlProductRepository>();
 builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped(_ => new ProductStorageProfileRepository(
-    builder.Configuration.GetConnectionString("Catalog")
-    ?? throw new ServiceUnavailableException("Catalog connection is not configured.")));
-builder.Services.AddScoped(_ => new CatalogLookupRepository(
-    builder.Configuration.GetConnectionString("Catalog")
-    ?? throw new ServiceUnavailableException("Catalog connection is not configured.")));
+builder.Services.AddScoped<ProductStorageProfileRepository>();
+builder.Services.AddScoped<CatalogLookupRepository>();
 
 var app = builder.Build();
 app.UseEwmsServiceErrors();

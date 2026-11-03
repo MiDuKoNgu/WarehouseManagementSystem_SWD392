@@ -136,7 +136,7 @@ export function SerialForm({ data, editing, busy, save, cancel }: Props) {
           </select></label>{fieldError('line')}
         </div>
         <div className="inbound-form-group">
-          <h3>2. Sản xuất & tình trạng</h3>
+          <h3>2. Thông tin sản xuất</h3>
           <div className="inbound-two-columns">
             <div><label>Tháng sản xuất<select name="month" required value={month} {...fieldProps('month')} onChange={e => { setMonth(e.target.value); clear('month', 'year'); }}>
               <option value="">Tháng</option>{Array.from({ length: 12 }, (_, i) => <option key={i} value={i + 1}>{i + 1}</option>)}
@@ -144,18 +144,21 @@ export function SerialForm({ data, editing, busy, save, cancel }: Props) {
             <div><label>Năm sản xuất<input name="year" required type="number" min={1900} step={1} value={year} {...fieldProps('year')} onChange={e => { setYear(e.target.value); clear('month', 'year'); }} inputMode="numeric" /></label>{fieldError('year')}</div>
           </div>
           <label className="inbound-checkbox"><input type="checkbox" checked={retain} onChange={e => setRetain(e.target.checked)} />Giữ tháng/năm cho Serial tiếp theo</label>
-          <label>Tình trạng<select name="condition" value={condition} {...fieldProps('condition')} onChange={e => { setCondition(e.target.value); clear('condition', 'note'); }}>
-            <option value="GOOD">GOOD — Hàng tốt</option>
-            {data.policy.acceptDamaged && <option value="DAMAGED">DAMAGED — Hàng hỏng — nhận cách ly</option>}
-          </select></label>{fieldError('condition')}
-          <label>Ghi chú tình trạng<textarea name="note" required={condition === 'DAMAGED'} maxLength={1000} value={note} {...fieldProps('note')} onChange={e => { setNote(e.target.value); clear('note'); }} /></label>{fieldError('note')}
-          {condition === 'DAMAGED' && <p className="po-helper">Thiết bị sẽ bị cách ly, không được ghi nhận vào nguồn hàng khả dụng.</p>}
         </div>
         <div className="inbound-form-group">
           <h3>3. Nhận diện Serial</h3>
           <SerialCapture resetKey={`${line}-${generation}`} disabled={busy || !line} onRescan={() => { setSerial(''); setMethod('MANUAL'); clear('serial'); }} onChoose={(value, source) => { setSerial(value); setMethod(source); clear('serial'); input.current?.focus(); }} />
           <label>Serial<input name="serial" ref={input} required maxLength={100} autoComplete="off" value={serial} {...fieldProps('serial')} onChange={e => { setSerial(e.target.value); setMethod('MANUAL'); clear('serial'); }} /></label>{fieldError('serial')}
           <small className="po-muted">Nguồn: {method === 'CAMERA' ? 'Camera' : method === 'IMAGE_UPLOAD' ? 'Ảnh tem' : 'Nhập tay'} · Enter để thêm nhanh.</small>
+        </div>
+        <div className="inbound-form-group">
+          <h3>4. Tình trạng hàng</h3>
+          <label>Tình trạng<select name="condition" value={condition} {...fieldProps('condition')} onChange={e => { setCondition(e.target.value); clear('condition', 'note'); }}>
+            <option value="GOOD">GOOD — Hàng tốt</option>
+            {data.policy.acceptDamaged && <option value="DAMAGED">DAMAGED — Hàng hỏng — nhận cách ly</option>}
+          </select></label>{fieldError('condition')}
+          <label>Ghi chú tình trạng<textarea name="note" required={condition === 'DAMAGED'} maxLength={1000} value={note} {...fieldProps('note')} onChange={e => { setNote(e.target.value); clear('note'); }} /></label>{fieldError('note')}
+          {condition === 'DAMAGED' && <p className="po-helper">Thiết bị sẽ bị cách ly, không được ghi nhận vào nguồn hàng khả dụng.</p>}
         </div>
         {saveError && <div className="po-alert inbound-save-error" role="alert"><p>{saveError}</p></div>}
         <div className="po-actions">

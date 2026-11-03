@@ -17,6 +17,27 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('internal navigation and session lifetime', () => {
+  it('opens the workspace when login finishes before the initial session check', async () => {
+    window.history.replaceState(null, '', '/login');
+    let finishSession!: (response: Response) => void;
+    const session = new Promise<Response>(resolve => { finishSession = resolve; });
+    vi.stubGlobal('fetch', vi.fn(async (path: string) => {
+      if (path === '/api/auth/me') return session;
+      if (path === '/api/auth/csrf') return reply({ token: 'test-csrf' });
+      if (path === '/api/auth/login') return reply(buyer);
+      if (path === '/api/workspaces/purchasing') return reply({ user: buyer });
+      throw new Error(`Unexpected API ${path}`);
+    }));
+    render(<App />);
+    fireEvent.change(screen.getByLabelText('Tài khoản'), { target: { value: 'buyer' } });
+    fireEvent.change(screen.getByLabelText('Mật khẩu'), { target: { value: 'test-password' } });
+    fireEvent.submit(screen.getByRole('button', { name: 'Đăng nhập', exact: false }).closest('form')!);
+    try {
+      await screen.findByRole('heading', { name: 'Mua đúng hàng. Sẵn sàng nhận.' });
+    } finally { finishSession(reply({}, 401)); }
+    await waitFor(() => expect(screen.queryByText('Đang kiểm tra phiên đăng nhập…')).toBeNull());
+    expect(window.location.pathname).toBe('/purchasing');
+  });
   it.each(['/', '/login'])('opens the login page at %s even with an existing session', async (path) => {
     window.history.replaceState(null, '', path);
     render(<App />);

@@ -38,17 +38,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   async function login(username: string, password: string, remember: boolean) {
-    generation.current++;
-    const profile = await authApi.login(username, password, remember);
-    generation.current++;
-    setUser(profile);
-    setError('');
-    return profile;
+    const version = ++generation.current;
+    try {
+      const profile = await authApi.login(username, password, remember);
+      generation.current++;
+      setUser(profile);
+      setLoading(false);
+      setError('');
+      return profile;
+    } catch (reason) {
+      if (version === generation.current) setLoading(false);
+      throw reason;
+    }
   }
   async function logout() {
     await authApi.logout();
     generation.current++;
     setUser(null);
+    setLoading(false);
     setError('');
   }
   return <AuthContext.Provider value={{ user, loading, error, refresh, login, logout }}>{children}</AuthContext.Provider>;

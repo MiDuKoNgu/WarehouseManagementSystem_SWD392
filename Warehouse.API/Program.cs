@@ -1,4 +1,6 @@
 using Warehouse.DAL.Repositories;
+using Warehouse.DAL;
+using Microsoft.EntityFrameworkCore;
 using WMS.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,12 +12,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddEwmsServiceSecurity(builder.Configuration);
-builder.Services.AddScoped(_ => new PutawayLayoutRepository(
+builder.Services.AddDbContextFactory<WarehouseDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("Warehouse")
     ?? throw new ServiceUnavailableException("Warehouse connection is not configured.")));
-builder.Services.AddScoped(_ => new WarehouseLookupRepository(
-    builder.Configuration.GetConnectionString("Warehouse")
-    ?? throw new ServiceUnavailableException("Warehouse connection is not configured.")));
+builder.Services.AddScoped<PutawayLayoutRepository>();
+builder.Services.AddScoped<WarehouseLookupRepository>();
 
 var app = builder.Build();
 app.UseEwmsServiceErrors();

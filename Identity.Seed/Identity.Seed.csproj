@@ -7,6 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Identity.BLL/Identity.BLL.csproj" />
+    <ProjectReference Include="../Identity.DAL/Identity.DAL.csproj" />
+    <ProjectReference Include="../Warehouse.DAL/Warehouse.DAL.csproj" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
   </ItemGroup>
 </Project>

@@ -1,18 +1,20 @@
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Warehouse.Models.Lookups;
 
 namespace Warehouse.DAL.Repositories;
 
-public sealed class WarehouseLookupRepository(string connectionString)
+public sealed class WarehouseLookupRepository(IDbContextFactory<WarehouseDbContext> contexts)
 {
+    public WarehouseLookupRepository(string connectionString)
+        : this(new PooledDbContextFactory<WarehouseDbContext>(WarehouseDbContext.CreateOptions(connectionString))) { }
+
     public async Task<List<WarehouseOption>> GetAsync(CancellationToken cancellationToken)
     {
-        await using var connection = new SqlConnection(connectionString);
-        await connection.OpenAsync(cancellationToken);
-        await using var command = new SqlCommand("SELECT WarehouseID, WarehouseName, Address FROM dbo.Warehouse WHERE Status = 'ACTIVE' ORDER BY WarehouseName", connection);
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        var warehouses = new List<WarehouseOption>();
-        while (await reader.ReadAsync(cancellationToken)) warehouses.Add(new(reader.GetInt32(0), reader.GetString(1), reader.GetString(2)));
-        return warehouses;
+        await using var db = await contexts.CreateDbContextAsync(cancellationToken);
+        return await db.Warehouses.AsNoTracking().Where(x => x.Status == "ACTIVE")
+            .OrderBy(x => x.WarehouseName)
+            .Select(x => new WarehouseOption(x.WarehouseId, x.WarehouseName, x.Address))
+            .ToListAsync(cancellationToken);
     }
 }

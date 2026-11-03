@@ -1,3 +1,5 @@
+using Inventory.DAL;
+using Microsoft.EntityFrameworkCore;
 using WMS.Audit;
 using Inventory.DAL.Receiving;
 using WMS.ServiceDefaults;
@@ -17,9 +19,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddEwmsServiceSecurity(builder.Configuration);
+builder.Services.AddDbContextFactory<InventoryDbContext>(options => options.UseSqlServer(
+    builder.Configuration.GetConnectionString("Inventory") ?? throw new ServiceUnavailableException("Inventory connection is not configured.")));
 builder.Services.AddScoped<IPutawayOperationGuard, CurrentSchemaPutawayGuard>();
 builder.Services.AddScoped<IPutawayRepository>(provider => new SqlPutawayRepository(
-    builder.Configuration.GetConnectionString("Inventory") ?? throw new ServiceUnavailableException("Inventory connection is not configured."),
+    provider.GetRequiredService<IDbContextFactory<InventoryDbContext>>(),
     provider.GetRequiredService<IPutawayOperationGuard>(),
     builder.Configuration["Putaway:CatalogDatabase"] ?? "CatalogDB",
     builder.Configuration["Putaway:WarehouseDatabase"] ?? "WarehouseDB"));
@@ -29,15 +33,13 @@ builder.Services.AddSingleton(new ReceiptPolicy(
     builder.Configuration.GetValue<bool>("Inbound:AcceptDamaged"),
     builder.Configuration.GetValue<bool>("Inbound:AllowCancellation")));
 builder.Services.AddScoped(provider => new SqlInboundRepository(
-    builder.Configuration.GetConnectionString("Inventory") ?? throw new ServiceUnavailableException("Inventory connection is not configured."),
+    provider.GetRequiredService<IDbContextFactory<InventoryDbContext>>(),
     provider.GetRequiredService<ReceiptPolicy>()));
-builder.Services.AddScoped(_ => new ReceiptQueries(builder.Configuration.GetConnectionString("Inventory")
-    ?? throw new ServiceUnavailableException("Inventory connection is not configured.")));
+builder.Services.AddScoped(provider => new ReceiptQueries(provider.GetRequiredService<IDbContextFactory<InventoryDbContext>>()));
 builder.Services.AddHttpClient("receiving-orders", client => client.Timeout = TimeSpan.FromSeconds(30))
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false, AllowAutoRedirect = false });
 builder.Services.AddScoped<ReceivingOrderClient>();
-builder.Services.AddScoped<IReceivingSummaryRepository>(_ => new ReceivingSummaryRepository(
-    builder.Configuration.GetConnectionString("Inventory") ?? throw new ServiceUnavailableException("Inventory connection is not configured.")));
+builder.Services.AddScoped<IReceivingSummaryRepository>(provider => new ReceivingSummaryRepository(provider.GetRequiredService<IDbContextFactory<InventoryDbContext>>()));
 builder.Services.AddScoped(_ => new SqlAuditReader(
     builder.Configuration.GetConnectionString("Inventory") ?? throw new ServiceUnavailableException("Inventory connection is not configured."), "inventory"));
 

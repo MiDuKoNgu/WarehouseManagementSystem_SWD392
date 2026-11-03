@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Procurement.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Procurement.API.Clients;
 using Procurement.BLL.PurchaseOrders;
@@ -19,10 +21,10 @@ builder.Services.AddScoped(_ => new SqlAuditReader(
 builder.Services.AddHttpClient("purchase-order-lookups", client => client.Timeout = TimeSpan.FromSeconds(15))
     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false, AllowAutoRedirect = false });
 builder.Services.AddScoped<IPurchaseOrderLookup, PurchaseOrderLookupClient>();
-builder.Services.AddScoped<IPurchaseOrderRepository>(_ => new SqlPurchaseOrderRepository(
-    builder.Configuration.GetConnectionString("Procurement") ?? throw new InvalidOperationException("Procurement database connection is not configured.")));
-builder.Services.AddScoped(_ => new SqlReceivingReservationRepository(
+builder.Services.AddDbContextFactory<ProcurementDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("Procurement") ?? throw new ServiceUnavailableException("Procurement connection is not configured.")));
+builder.Services.AddScoped<IPurchaseOrderRepository, SqlPurchaseOrderRepository>();
+builder.Services.AddScoped<SqlReceivingReservationRepository>();
 builder.Services.AddSingleton<IPurchaseOrderWorkbook, PurchaseOrderWorkbook>();
 builder.Services.AddSingleton<ImportPreviewStore>();
 builder.Services.AddScoped<PurchaseOrderService>();

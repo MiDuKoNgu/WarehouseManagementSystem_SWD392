@@ -1,19 +1,24 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace WMS.Audit;
 
 /// <summary>Read-only SQL operations against one owning service database. No cross-database joins.</summary>
 public sealed class SqlAuditReader
 {
-    private readonly string _connectionString;
+    private readonly IDbContextFactory<AuditDbContext> _contexts;
     private readonly string _source;
     private readonly string _cte;
 
     public SqlAuditReader(string connectionString, string source)
+        : this(new PooledDbContextFactory<AuditDbContext>(new DbContextOptionsBuilder<AuditDbContext>().UseSqlServer(connectionString).Options), source) { }
+
+    internal SqlAuditReader(IDbContextFactory<AuditDbContext> contexts, string source)
     {
         if (source is not ("procurement" or "inventory")) throw new ArgumentException("Unsupported audit source.", nameof(source));
-        _connectionString = connectionString;
+        _contexts = contexts;
         _source = source;
         var join = source == "procurement"
             ? "LEFT JOIN dbo.PurchaseOrder d ON d.PurchaseOrderID = TRY_CONVERT(bigint, a.EntityID) AND UPPER(a.EntityName) IN ('PURCHASEORDER','PO')"
@@ -31,7 +36,7 @@ public sealed class SqlAuditReader
                     {{group}} AS BusinessGroup,
                     COALESCE({{document}},JSON_VALUE(j.Payload,'$.poCode'),JSON_VALUE(j.Payload,'$.receiptCode'),a.EntityID) AS DocumentCode
                 FROM dbo.AuditLog a
-                CROSS APPLY (SELECT CASE WHEN ISJSON(a.NewValues) = 1 THEN a.NewValues ELSE N'{}' END AS Payload) j
+                CROSS APPLY (SELECT CASE WHEN ISJSON(a.NewValues) = 1 THEN a.NewValues ELSE NCHAR(123) + NCHAR(125) END AS Payload) j
                 {{join}}
             )
             """;
@@ -48,75 +53,70 @@ public sealed class SqlAuditReader
     {
         query.Validate();
         var cursor = AuditCursor.Decode(query.Cursor);
-        await using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync(ct);
-        await using var count = new SqlCommand(_cte + " SELECT COUNT(*) FROM Logs " + Filter, connection);
-        Parameters(count, query);
-        var total = Convert.ToInt32(await count.ExecuteScalarAsync(ct));
-        await using var command = new SqlCommand(_cte + "\n" + """
-            SELECT TOP (@take) AuditLogID,UserID,ActorName,BusinessGroup,Action,EntityName,EntityID,DocumentCode,Status,CreatedAt
+        await using var db = await _contexts.CreateDbContextAsync(ct);
+        // Materialize each CTE directly: SQL Server does not allow composing it as a subquery.
+        var totals = await db.Database.SqlQueryRaw<int>(_cte + " SELECT COUNT(*) AS Value FROM Logs " + Filter,
+            Parameters(query)).ToArrayAsync(ct);
+        var parameters = Parameters(query).Concat(new object[]
+        {
+            new SqlParameter("@take", SqlDbType.Int) { Value = query.PageSize + 1 },
+            new SqlParameter("@cursorTime", SqlDbType.DateTime2) { Value = cursor is null ? DBNull.Value : cursor.CreatedAt.UtcDateTime },
+            new SqlParameter("@cursorId", SqlDbType.BigInt) { Value = cursor?.AuditLogId ?? 0 },
+            new SqlParameter("@sourceAfter", SqlDbType.Bit) { Value = cursor is not null && string.CompareOrdinal(_source, cursor.Source) > 0 },
+            new SqlParameter("@sameSource", SqlDbType.Bit) { Value = cursor?.Source == _source }
+        }).ToArray();
+        var rows = await db.Database.SqlQueryRaw<AuditReadRow>(_cte + "\n" + """
+            SELECT TOP (@take) AuditLogID,UserID,ActorName,BusinessGroup,Action,EntityName,EntityID,DocumentCode,Status,CreatedAt,
+                CAST(NULL AS nvarchar(max)) AS OldValues, CAST(NULL AS nvarchar(max)) AS NewValues
             FROM Logs
             """ + "\n" + Filter + "\n" + """
             AND (@cursorTime IS NULL OR CreatedAt < @cursorTime
                 OR (CreatedAt = @cursorTime AND (@sourceAfter = 1 OR (@sameSource = 1 AND AuditLogID < @cursorId))))
             ORDER BY CreatedAt DESC,AuditLogID DESC
-            """, connection);
-        Parameters(command, query);
-        command.Parameters.Add("@take", SqlDbType.Int).Value = query.PageSize + 1;
-        command.Parameters.Add("@cursorTime", SqlDbType.DateTime2).Value = cursor is null ? DBNull.Value : cursor.CreatedAt.UtcDateTime;
-        command.Parameters.Add("@cursorId", SqlDbType.BigInt).Value = cursor?.AuditLogId ?? 0;
-        command.Parameters.Add("@sourceAfter", SqlDbType.Bit).Value = cursor is not null && string.CompareOrdinal(_source, cursor.Source) > 0;
-        command.Parameters.Add("@sameSource", SqlDbType.Bit).Value = cursor?.Source == _source;
-        await using var reader = await command.ExecuteReaderAsync(ct);
-        var rows = new List<AuditItem>();
-        while (await reader.ReadAsync(ct)) rows.Add(Read(reader));
-        var items = rows.Take(query.PageSize).ToArray();
-        var hasMore = rows.Count > query.PageSize;
+            """, parameters).ToArrayAsync(ct);
+        var items = rows.Take(query.PageSize).Select(Read).ToArray();
+        var hasMore = rows.Length > query.PageSize;
         var next = hasMore && items.Length > 0 ? AuditCursor.Encode(new(items[^1].CreatedAt, _source, items[^1].AuditLogId)) : null;
-        return new(items, total, hasMore, next, query.PageSize);
+        return new(items, totals.Single(), hasMore, next, query.PageSize);
     }
 
     public async Task<AuditDetail?> DetailAsync(long id, CancellationToken ct)
     {
         if (id <= 0) return null;
-        await using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync(ct);
-        await using var command = new SqlCommand(_cte + "\n" + """
+        await using var db = await _contexts.CreateDbContextAsync(ct);
+        var rows = await db.Database.SqlQueryRaw<AuditReadRow>(_cte + "\n" + """
             SELECT l.AuditLogID,l.UserID,l.ActorName,l.BusinessGroup,l.Action,l.EntityName,l.EntityID,l.DocumentCode,l.Status,l.CreatedAt,
                    a.OldValues,a.NewValues
             FROM Logs l JOIN dbo.AuditLog a ON a.AuditLogID=l.AuditLogID
             WHERE l.AuditLogID=@id AND l.BusinessGroup IS NOT NULL
-            """, connection);
-        command.Parameters.Add("@id", SqlDbType.BigInt).Value = id;
-        await using var reader = await command.ExecuteReaderAsync(ct);
-        if (!await reader.ReadAsync(ct)) return null;
-        return new(Read(reader), AuditValueRedactor.Sanitize(reader.IsDBNull(10) ? null : reader.GetString(10)),
-            AuditValueRedactor.Sanitize(reader.IsDBNull(11) ? null : reader.GetString(11)));
+            """, new SqlParameter("@id", SqlDbType.BigInt) { Value = id }).ToArrayAsync(ct);
+        var row = rows.SingleOrDefault();
+        return row is null ? null : new(Read(row), AuditValueRedactor.Sanitize(row.OldValues),
+            AuditValueRedactor.Sanitize(row.NewValues));
     }
 
     public async Task<string[]> ActionsAsync(CancellationToken ct)
     {
-        await using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync(ct);
-        await using var command = new SqlCommand(_cte + " SELECT DISTINCT Action FROM Logs WHERE BusinessGroup IS NOT NULL ORDER BY Action", connection);
-        await using var reader = await command.ExecuteReaderAsync(ct);
-        var values = new List<string>();
-        while (await reader.ReadAsync(ct)) values.Add(reader.GetString(0));
-        return values.ToArray();
+        await using var db = await _contexts.CreateDbContextAsync(ct);
+        return await db.Database.SqlQueryRaw<string>(_cte +
+            " SELECT DISTINCT Action AS Value FROM Logs WHERE BusinessGroup IS NOT NULL ORDER BY Action").ToArrayAsync(ct);
     }
 
-    private AuditItem Read(SqlDataReader reader) => new(_source, reader.GetInt64(0), reader.GetInt32(1),
-        reader.IsDBNull(2) ? null : reader.GetString(2), reader.GetString(3), reader.GetString(4), reader.GetString(5), reader.GetString(6),
-        reader.IsDBNull(7) ? null : reader.GetString(7), reader.GetString(8), new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(9), DateTimeKind.Utc)));
+    private AuditItem Read(AuditReadRow row) => new(_source, row.AuditLogID, row.UserID, row.ActorName,
+        row.BusinessGroup, row.Action, row.EntityName, row.EntityID, row.DocumentCode, row.Status,
+        new DateTimeOffset(DateTime.SpecifyKind(row.CreatedAt, DateTimeKind.Utc)));
 
-    private static void Parameters(SqlCommand command, AuditQuery query)
+    private static object[] Parameters(AuditQuery query)
     {
-        command.Parameters.Add("@user", SqlDbType.Int).Value = query.UserId is { } user ? user : DBNull.Value;
-        command.Parameters.Add("@group", SqlDbType.VarChar, 16).Value = (object?)query.BusinessGroup ?? DBNull.Value;
-        command.Parameters.Add("@action", SqlDbType.VarChar, 60).Value = (object?)query.Action ?? DBNull.Value;
         var code = query.DocumentCode?.Replace("~", "~~").Replace("%", "~%").Replace("_", "~_").Replace("[", "~[");
-        command.Parameters.Add("@document", SqlDbType.NVarChar, 210).Value = code is null ? DBNull.Value : "%" + code + "%";
-        command.Parameters.Add("@from", SqlDbType.DateTime2).Value = query.From is { } from ? from.UtcDateTime : DBNull.Value;
-        command.Parameters.Add("@to", SqlDbType.DateTime2).Value = query.To is { } to ? to.UtcDateTime : DBNull.Value;
+        return
+        [
+            new SqlParameter("@user", SqlDbType.Int) { Value = query.UserId is { } user ? user : DBNull.Value },
+            new SqlParameter("@group", SqlDbType.VarChar, 16) { Value = (object?)query.BusinessGroup ?? DBNull.Value },
+            new SqlParameter("@action", SqlDbType.VarChar, 60) { Value = (object?)query.Action ?? DBNull.Value },
+            new SqlParameter("@document", SqlDbType.NVarChar, 210) { Value = code is null ? DBNull.Value : "%" + code + "%" },
+            new SqlParameter("@from", SqlDbType.DateTime2) { Value = query.From is { } from ? from.UtcDateTime : DBNull.Value },
+            new SqlParameter("@to", SqlDbType.DateTime2) { Value = query.To is { } to ? to.UtcDateTime : DBNull.Value }
+        ];
     }
 }

@@ -1,65 +1,43 @@
-using System.Data;
 using Identity.BLL.Authentication;
 using Identity.Models.Authentication;
-using Microsoft.Data.SqlClient;
+using Identity.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Identity.DAL.Repositories;
 
-public sealed class SqlUserRepository(string connectionString) : IUserRepository
+public sealed class SqlUserRepository(IDbContextFactory<IdentityDbContext> contexts) : IUserRepository
 {
-    private readonly string _connectionString = new SqlConnectionStringBuilder(connectionString)
+    public SqlUserRepository(string connectionString) : this(new IdentityDbContextFactory(connectionString)) { }
+
+    public async Task<AuthUser?> FindByUsernameAsync(string username, CancellationToken cancellationToken)
     {
-        ConnectTimeout = 5,
-        ConnectRetryCount = 0
-    }.ConnectionString;
-    private const string SelectUser = """
-        SELECT u.UserID, u.Username, u.FullName, u.PasswordHash, r.RoleName,
-               u.WarehouseID, u.Status, u.RowVersion
-        FROM dbo.[User] u JOIN dbo.[Role] r ON r.RoleID = u.RoleID
-        """;
-
-    public Task<AuthUser?> FindByUsernameAsync(string username, CancellationToken cancellationToken) =>
-        FindAsync("u.Username = @value", new SqlParameter("@value", SqlDbType.NVarChar, 100) { Value = username }, cancellationToken);
-
-    public Task<AuthUser?> FindByIdAsync(int id, CancellationToken cancellationToken) =>
-        FindAsync("u.UserID = @value", new SqlParameter("@value", SqlDbType.Int) { Value = id }, cancellationToken);
-
+        await using var db = await contexts.CreateDbContextAsync(cancellationToken);
+        return await AuthUsers(db.Users.Where(x => x.Username == username)).SingleOrDefaultAsync(cancellationToken);
+    }
+    public async Task<AuthUser?> FindByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        await using var db = await contexts.CreateDbContextAsync(cancellationToken);
+        return await AuthUsers(db.Users.Where(x => x.UserId == id)).SingleOrDefaultAsync(cancellationToken);
+    }
     public async Task<UserDisplay[]> ListDisplayNamesAsync(CancellationToken cancellationToken)
     {
-        await using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync(cancellationToken);
-        // Read only display fields; hashes and contact details never leave Identity service.
-        await using var command = new SqlCommand("SELECT UserID, Username, FullName FROM dbo.[User] ORDER BY FullName, UserID", connection) { CommandTimeout = 5 };
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        var users = new List<UserDisplay>();
-        while (await reader.ReadAsync(cancellationToken)) users.Add(new(reader.GetInt32(0), reader.GetString(1), reader.GetString(2)));
-        return users.ToArray();
+        await using var db = await contexts.CreateDbContextAsync(cancellationToken);
+        // Project only display fields; password hashes remain inside Identity.
+        return await db.Users.AsNoTracking().OrderBy(x => x.FullName)
+            .Select(x => new UserDisplay(x.UserId, x.Username, x.FullName)).ToArrayAsync(cancellationToken);
     }
-
-    private async Task<AuthUser?> FindAsync(string predicate, SqlParameter parameter, CancellationToken cancellationToken)
-    {
-        await using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync(cancellationToken);
-        await using var command = new SqlCommand(SelectUser + " WHERE " + predicate, connection);
-        command.CommandTimeout = 5;
-        command.Parameters.Add(parameter);
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        if (!await reader.ReadAsync(cancellationToken)) return null;
-        return new(reader.GetInt32(0), reader.GetString(1), reader.GetString(2), reader.GetString(3),
-            reader.GetString(4), reader.IsDBNull(5) ? null : reader.GetInt32(5), reader.GetString(6), (byte[])reader[7]);
-    }
+    private static IQueryable<AuthUser> AuthUsers(IQueryable<User> users) => users.AsNoTracking()
+        .Select(x => new AuthUser(x.UserId, x.Username, x.FullName, x.PasswordHash,
+            x.Role.RoleName, x.WarehouseId, x.Status, x.RowVersion));
 
     public async Task UpdatePasswordHashAsync(AuthUser user, string hash, CancellationToken cancellationToken)
     {
-        await using var connection = new SqlConnection(_connectionString);
-        await connection.OpenAsync(cancellationToken);
-        await using var command = new SqlCommand("""
-            UPDATE dbo.[User] SET PasswordHash = @hash WHERE UserID = @id AND RowVersion = @version
-            """, connection);
-        command.CommandTimeout = 5;
-        command.Parameters.Add("@hash", SqlDbType.NVarChar, 512).Value = hash;
-        command.Parameters.Add("@id", SqlDbType.Int).Value = user.UserId;
-        command.Parameters.Add("@version", SqlDbType.Timestamp, 8).Value = user.RowVersion;
-        await command.ExecuteNonQueryAsync(cancellationToken);
+        await using var db = await contexts.CreateDbContextAsync(cancellationToken);
+        var entity = new User { UserId = user.UserId, RowVersion = user.RowVersion, PasswordHash = hash };
+        db.Attach(entity);
+        db.Entry(entity).Property(x => x.PasswordHash).IsModified = true;
+        try { await db.SaveChangesAsync(cancellationToken); }
+        // Another request changed the account. Do not overwrite its new password/version.
+        catch (DbUpdateConcurrencyException) { }
     }
 }

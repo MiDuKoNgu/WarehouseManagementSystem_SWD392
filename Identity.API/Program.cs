@@ -1,3 +1,5 @@
+using Identity.DAL;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.RateLimiting;
 using Identity.API.Authentication;
 using Identity.BLL.Authentication;
@@ -12,10 +14,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<PasswordService>();
 builder.Services.AddScoped<LoginService>();
-builder.Services.AddScoped<IUserRepository>(_ => new SqlUserRepository(
-    builder.Configuration.GetConnectionString("Identity")
+builder.Services.AddDbContextFactory<IdentityDbContext>(options => options.UseSqlServer(
+    IdentityDbContext.ConfigureConnection(builder.Configuration.GetConnectionString("Identity")
     ?? builder.Configuration["EWMS_IDENTITY_CONNECTION"]
-    ?? throw new InvalidOperationException("Identity database connection is not configured.")));
+    ?? throw new InvalidOperationException("Identity database connection is not configured.")), sql => sql.CommandTimeout(5)));
+builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
 builder.Services.AddScoped<SessionValidation>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
@@ -51,7 +54,7 @@ var app = builder.Build();
 app.Use(async (context, next) =>
 {
     try { await next(); }
-    catch (Exception exception) when ((exception is SqlException or InvalidOperationException) && !context.Response.HasStarted)
+    catch (Exception exception) when ((exception is SqlException or DbUpdateException or InvalidOperationException) && !context.Response.HasStarted)
     {
         if (exception is SqlException sql)
             app.Logger.LogError("Identity SQL request failed: number={SqlNumber}, state={SqlState}, class={SqlClass}", sql.Number, sql.State, sql.Class);

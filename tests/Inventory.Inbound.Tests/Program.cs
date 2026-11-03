@@ -16,6 +16,8 @@ internal static class InboundTests
 {
     public static async Task Main()
     {
+        await QueryTranslationTests.Run();
+        await LiveReadTests.Run();
         Rules();
         PutawayRuleTests.Run();
         await ApiSecurity();

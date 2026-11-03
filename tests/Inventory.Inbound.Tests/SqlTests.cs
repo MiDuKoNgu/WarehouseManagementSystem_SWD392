@@ -37,6 +37,9 @@ internal static class SqlTests
             await repo.SaveItemAsync(first,null,Item(header,"MiXeD-1"),order,actor,Ct);
             var scanned=await Header(repo,first);
             Check(scanned.RowVersion!=header.RowVersion,"item write invalidates receipt version");
+            var withoutCurrent=(await repo.ProgressAsync(order,null,Ct)).Single();
+            Check(withoutCurrent.CurrentQuantity==0&&withoutCurrent.ReservedQuantity==1&&withoutCurrent.RemainingQuantity==1,
+                "progress without current receipt executes valid SQL and counts existing draft as reserved");
             Check(await Count(sql,"SELECT COUNT(*) FROM dbo.SerialItem")==0,"DRAFT scan never creates stock");
             await Reject(()=>repo.SaveItemAsync(first,null,Item(scanned,"MiXeD-1"),order,actor,Ct),409,"duplicate in same receipt");
             await Reject(()=>repo.SaveItemAsync(first,null,Item(header,"STALE"),order,actor,Ct),409,"stale version");

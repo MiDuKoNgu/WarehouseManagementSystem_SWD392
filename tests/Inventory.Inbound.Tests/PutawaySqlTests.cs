@@ -3,6 +3,7 @@ using Inventory.BLL.Putaway;
 using Inventory.DAL.Putaway;
 using Inventory.Models.Putaway;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace Inventory.Inbound.Tests;
 
@@ -263,15 +264,21 @@ internal static class PutawaySqlTests
             await f.Insert(id, 7, 1);
             var version = (await f.Find(id)).RowVersion;
             var table = audit ? "AuditLog" : "SerialMovement";
+            var actionColumn = audit ? "Action" : "EventType";
+            var rejectedAction = audit ? "PUTAWAY_COMPLETED" : "PUTAWAY";
             var movementCount = await f.Scalar<int>("SELECT COUNT(*) FROM dbo.SerialMovement");
             var auditCount = await f.Scalar<int>("SELECT COUNT(*) FROM dbo.AuditLog");
-            await f.Execute($"CREATE TRIGGER dbo.RejectPutawayFixture ON dbo.{table} AFTER INSERT AS THROW 51000, 'Injected fixture failure', 1;");
+            // CHECK constraints reject the intended write without introducing triggers
+            // incompatible with EF's normal SQL Server OUTPUT inserts.
+            await f.Execute($"ALTER TABLE dbo.{table} WITH NOCHECK ADD CONSTRAINT RejectPutawayFixture CHECK ({actionColumn}<>'{rejectedAction}');");
             try
             {
                 var error = await Attempt(() => f.Repository.ConfirmAsync(ActorA, new(id, 9, version), Ct));
-                Check(error is SqlException { Number: 51000 }, "failure injected at " + table);
+                Check(error is SqlException { Number: 547 }
+                    or DbUpdateException { InnerException: SqlException { Number: 547 } },
+                    "failure injected at " + table + "; actual: " + error);
             }
-            finally { await f.Execute("DROP TRIGGER dbo.RejectPutawayFixture;"); }
+            finally { await f.Execute($"ALTER TABLE dbo.{table} DROP CONSTRAINT RejectPutawayFixture;"); }
             var item = await f.Find(id);
             Check(item.CurrentLocationId is null && item.RowVersion == version, "serial rolls back with " + table + " failure");
             Check(await f.Scalar<int>("SELECT COUNT(*) FROM dbo.SerialMovement") == movementCount &&
@@ -359,7 +366,9 @@ internal static class PutawaySqlTests
         CREATE TABLE dbo.SerialMovement(MovementID bigint IDENTITY PRIMARY KEY,SerialItemID bigint NOT NULL,PerformedByUserID int NOT NULL,
             EventType varchar(30) NOT NULL,OccurredAt datetime2 NOT NULL,FromState varchar(20),ToState varchar(20),FromCondition varchar(8),
             ToCondition varchar(8),FromWarehouseID int,ToWarehouseID int,FromLocationID int NULL,ToLocationID int NULL,
-            FromQuarantined bit,ToQuarantined bit,Note nvarchar(1000));
+            FromQuarantined bit,ToQuarantined bit,Note nvarchar(1000),
+            InboundID bigint NULL,OutboundID bigint NULL,ReturnReceiptID bigint NULL,DispatchID bigint NULL,
+            TransferReceiptID bigint NULL,AdjustmentID bigint NULL,LossRequestID bigint NULL);
         CREATE TABLE dbo.AuditLog(AuditID bigint IDENTITY PRIMARY KEY,UserID int,Action nvarchar(100),EntityName nvarchar(100),
             EntityID nvarchar(100),OldValues nvarchar(max),NewValues nvarchar(max),Status varchar(20),CreatedAt datetime2);
         """;

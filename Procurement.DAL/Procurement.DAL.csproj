@@ -9,5 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="../Procurement.BLL/Procurement.BLL.csproj" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
   </ItemGroup>
 </Project>

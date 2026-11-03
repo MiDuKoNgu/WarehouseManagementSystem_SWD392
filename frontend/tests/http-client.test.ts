@@ -18,3 +18,21 @@ it('preserves server authentication failures instead of treating them as network
   vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ message: 'Phiên hết hạn' }), { status: 401 })));
   await expect(request('/api/auth/me')).rejects.toEqual(new ApiError(401, 'Phiên hết hạn'));
 });
+
+it('preserves field validation errors returned by ASP.NET controllers', async () => {
+  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+    title: 'One or more validation errors occurred.',
+    errors: { Username: ['The Username field is required.'], Lines: ['At least one line is required.'] },
+  }), { status: 400 })));
+  await expect(request('/api/purchase-orders')).rejects.toMatchObject({
+    status: 400,
+    message: expect.stringContaining('The Username field is required.\nAt least one line is required.'),
+  });
+});
+
+it('keeps business validation arrays and removes repeated error messages', async () => {
+  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({
+    message: 'Invalid order', errors: ['Invalid order', 'Unknown supplier', 'Unknown supplier', null],
+  }), { status: 400 })));
+  await expect(request('/api/purchase-orders')).rejects.toEqual(new ApiError(400, 'Invalid order\nUnknown supplier'));
+});

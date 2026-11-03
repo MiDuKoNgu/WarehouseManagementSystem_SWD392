@@ -39,6 +39,22 @@ async function enterSerial(value = 'SN-AbC-001') {
   fireEvent.change(screen.getByLabelText('Serial'), { target: { value } });
 }
 
+it('retries the selected PO preview after a temporary service failure', async () => {
+  const loadOrder = vi.spyOn(inboundApi, 'order')
+    .mockRejectedValueOnce(new Error('Temporary PO preview failure'))
+    .mockResolvedValueOnce({ order, lines: detail.lines, policy: detail.policy });
+  try {
+    window.history.replaceState(null, '', '/warehouse/inbounds/new');
+    render(<App />);
+    await screen.findByRole('option', { name: /PO-INBOUND-10/ });
+    fireEvent.change(screen.getByLabelText('Purchase Order'), { target: { value: '10' } });
+    const notice = await screen.findByText('Temporary PO preview failure');
+    fireEvent.click(within(notice.closest('[role="alert"]')!).getByRole('button'));
+    await waitFor(() => expect(loadOrder).toHaveBeenCalledTimes(2));
+    expect((screen.getByRole('button', { name: /Tạo phiếu và tiếp nhận/ }) as HTMLButtonElement).disabled).toBe(false);
+  } finally { loadOrder.mockRestore(); }
+});
+
 it('shows missing values below their fields and in a dismissible toast without sending a save', async () => {
   render(<App />); await screen.findByRole('heading', { name: 'INB-001' });
   const form = screen.getByRole('button', { name: 'Xác nhận thêm Serial' }).closest('form')!;

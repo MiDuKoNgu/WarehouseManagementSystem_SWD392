@@ -17,6 +17,8 @@ public static class ProcurementTests
 {
     public static async Task<int> Main()
     {
+        await LiveReadTests.Run();
+        EfMappingTests.Run();
         var root = new DirectoryInfo(AppContext.BaseDirectory);
         while (root is not null && !Directory.Exists(Path.Combine(root.FullName, "Procurement.API"))) root = root.Parent;
         if (root is null) throw new Exception("Cannot locate Procurement.API.");

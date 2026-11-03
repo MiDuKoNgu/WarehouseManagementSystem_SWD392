@@ -19,7 +19,7 @@ $services = @(
 foreach ($service in $services) {
     $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback, $service.Port)
     try { $listener.Start() }
-    catch { throw "Port $($service.Port) dang duoc dung. Hay dung backend cu bang Ctrl+C truoc khi chay lai." }
+    catch { throw "Port $($service.Port) dang duoc dung. Hay chay task 'EWMS: Stop backend' hoac scripts/stop-ewms.ps1 truoc khi chay lai." }
     finally { $listener.Stop() }
 }
 

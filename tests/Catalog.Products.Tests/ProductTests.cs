@@ -17,6 +17,7 @@ public static class ProductTests
 {
     public static async Task<int> Main()
     {
+        SqlProductTests.CheckModel();
         var root = new DirectoryInfo(AppContext.BaseDirectory);
         while (root is not null && !Directory.Exists(Path.Combine(root.FullName,"Catalog.API"))) root=root.Parent;
         Environment.SetEnvironmentVariable("ASPNETCORE_TEST_CONTENTROOT_CATALOG_API",Path.Combine(root!.FullName,"Catalog.API"));

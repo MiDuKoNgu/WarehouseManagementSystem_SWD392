@@ -82,9 +82,26 @@ cd frontend
 npm.cmd run dev
 ```
 
-Nếu đang chạy bản cũ, dừng bằng Ctrl+C trong terminal sở hữu tiến trình, rồi chạy
-lại backend và Vite để nhận code/cấu hình mới. Không chỉ chạy `start-identity.ps1`
-khi sử dụng frontend qua gateway.
+Nếu đang chạy bản cũ, mở **Tasks: Run Task** trong VS Code và chạy **EWMS: Stop
+backend**, sau đó **EWMS: Backend**. Task dừng các backend do `start-ewms.ps1`
+khởi động trong checkout này, kể cả tiến trình còn sót khi Ctrl+C không dừng được.
+Chạy **EWMS: Frontend** nếu Vite chưa chạy. Không chỉ chạy `start-identity.ps1`
+khi sử dụng frontend qua gateway. Cách tương đương trong PowerShell:
+
+```powershell
+.\scripts\stop-ewms.ps1
+.\scripts\start-ewms.ps1
+```
+
+Nhập thông tin SQL Server khi launcher hỏi; đây là thông tin kết nối database,
+khác với tài khoản đăng nhập trang web. Nếu cổng vẫn bị chiếm sau stop task,
+kiểm tra tiến trình sở hữu cổng: task chỉ nhận đúng đường dẫn DLL backend của
+checkout này, không dừng mọi tiến trình `dotnet` trên máy.
+Task báo lỗi nếu tiến trình vẫn tồn tại nhưng không dừng được; trường hợp launcher
+đã tự dọn tiến trình giữa lúc kiểm tra và dừng được bỏ qua.
+
+Nếu tài khoản Windows hiện tại đã được cấp quyền SQL Server, có thể khởi động bằng
+`.\scripts\start-ewms.ps1 -WindowsAuthentication` thay cho nhập SQL username/password.
 
 Mở Network trong trình duyệt: frontend tiếp tục gọi `/api/...` cùng origin.
 Vite chỉ có một đích API là WMS 5062. Các cổng service riêng có thể dùng cho
@@ -95,6 +112,27 @@ dotnet run --project tests/WMS.ApiService.Tests
 dotnet run --project tests/WMS.Audit.Gateway.Tests
 dotnet run --project tests/Identity.Authentication.Tests
 ```
+
+## Chẩn đoán lỗi tải dữ liệu
+
+Kiểm tra log của service sở hữu dữ liệu trong `.local/logs/`, cùng mã HTTP ở
+Network. Một gateway đang chạy không bảo đảm mọi service phía sau xử lý được request.
+
+- `/api/warehouses/options` hoặc layout trả 500 với `Multiple constructors accepting
+  all given argument types`: `WarehouseDbContext` có constructor options và string.
+  Constructor options cần `[ActivatorUtilitiesConstructor]` để `AddDbContextFactory`
+  chọn đúng. Lỗi này cũng làm danh sách tùy chọn tạo PO thất bại.
+- Audit trả 500 với `FormatException` khi chạy SQL có tham số: EF xử lý dấu ngoặc
+  trong `SqlQueryRaw` theo định dạng placeholder. CTE dùng `NCHAR(123) + NCHAR(125)`
+  cho JSON object rỗng thay vì literal `N'{}'`; kết quả SQL vẫn tương đương.
+- Phiếu nhập không tải được tiến độ với lỗi SQL liên quan `COUNT(NULL)`: phép đếm
+  có điều kiện cần biểu diễn bằng tổng `1/0` cho số lượng hiện tại và số lượng nháp.
+  Kiểm thử Inbound với SQL thực tế bao phủ truy vấn và luồng ghi nhận liên quan.
+
+Sau khi sửa, build và khởi động lại backend để nạp DLL mới. Không bỏ kiểm tra quyền,
+CSRF hay điều kiện nghiệp vụ để che lỗi dữ liệu. Các thẻ tổng quan chưa có API hoặc
+luồng xử lý cần được triển khai riêng; chúng không tự trở thành chức năng đầy đủ
+sau khi sửa các lỗi trên.
 
 ## Khi triển khai ngoài development
 

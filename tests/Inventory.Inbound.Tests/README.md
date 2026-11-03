@@ -13,6 +13,19 @@ SQL cases cover multi-batch receipt, draft reservations and over-receipt, duplic
 
 Camera/device/OCR tests belong to the frontend suite; these backend tests do not claim physical-device verification.
 
+The suite always checks SQL translation for real receipt list/detail, serial, progress and pending Putaway queries without opening SQL connections. The SQL fixture also checks progress when no current receipt is selected, including reserved quantities from other drafts.
+
+To additionally sample existing business data using read-only repository calls:
+
+```powershell
+$env:EWMS_DATA_READ_TEST_SERVER = 'MIDUKONGU'
+dotnet run --project tests/Inventory.Inbound.Tests --no-restore -c Release
+dotnet run --project tests/Procurement.Tests --no-restore -c Release
+Remove-Item Env:EWMS_DATA_READ_TEST_SERVER
+```
+
+This option reads `InventoryDB` receipt lists, sampled details/items/receiving summaries and pending stock, plus `ProcurementDB` orders/lines and sampled details. It performs no business database writes. Disposable SQL fixtures remain separately controlled by the variables above and below.
+
 ## Putaway verification
 
 ```powershell

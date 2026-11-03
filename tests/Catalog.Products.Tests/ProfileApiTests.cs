@@ -8,6 +8,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using Warehouse.DAL;
 using Warehouse.Models.Lookups;
 
 namespace Catalog.Products.Tests;
@@ -24,6 +26,12 @@ internal static class ProfileApiTests
 
     public static async Task Run(string root)
     {
+        // Match the production registration without opening a database connection.
+        var services = new ServiceCollection();
+        services.AddDbContextFactory<WarehouseDbContext>(options => options.UseSqlServer(Settings("unused", "Warehouse")));
+        await using (var provider = services.BuildServiceProvider())
+        await using (var context = await provider.GetRequiredService<IDbContextFactory<WarehouseDbContext>>().CreateDbContextAsync())
+            Check(context.Model.FindEntityType(typeof(Warehouse.Models.Entities.Warehouse)) is not null, "warehouse factory resolves configured context");
         Environment.SetEnvironmentVariable("ASPNETCORE_TEST_CONTENTROOT_CATALOG_API",Path.Combine(root,"Catalog.API"));
         Environment.SetEnvironmentVariable("ASPNETCORE_TEST_CONTENTROOT_WAREHOUSE_API",Path.Combine(root,"Warehouse.API"));
         var server=Environment.GetEnvironmentVariable("EWMS_PUTAWAY_PROFILE_TEST_SERVER");

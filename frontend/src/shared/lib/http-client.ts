@@ -22,8 +22,10 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
         : response.status === 404 ? 'Không tìm thấy dữ liệu yêu cầu.'
         : response.status === 409 ? 'Dữ liệu đã thay đổi hoặc bản xem trước đã hết hạn. Vui lòng kiểm tra lại.'
         : 'Dịch vụ đang không khả dụng. Vui lòng thử lại sau.';
-      const message = body?.message || fallback;
-      const details: string[] = Array.isArray(body?.errors) ? body.errors.filter((value: unknown): value is string => typeof value === 'string' && value !== message) : [];
+      const message = typeof body?.message === 'string' && body.message.trim() ? body.message : fallback;
+      const errors: unknown[] = Array.isArray(body?.errors) ? body.errors
+        : body?.errors && typeof body.errors === 'object' ? Object.values(body.errors).flat() : [];
+      const details = errors.filter((value): value is string => typeof value === 'string' && !!value.trim() && value !== message);
       throw new ApiError(response.status, [message, ...new Set(details)].join('\n'));
     }
     return response.status === 204 ? undefined as T : await response.json();

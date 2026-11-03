@@ -15,6 +15,7 @@ public static class SourceTests
 {
     public static async Task<int> Main()
     {
+        await QueryCompilationTests.Run();
         var root = new DirectoryInfo(AppContext.BaseDirectory);
         while (root is not null && !Directory.Exists(Path.Combine(root.FullName, "Procurement.API"))) root = root.Parent;
         Environment.SetEnvironmentVariable("ASPNETCORE_TEST_CONTENTROOT_PROCUREMENT_API", Path.Combine(root!.FullName, "Procurement.API"));

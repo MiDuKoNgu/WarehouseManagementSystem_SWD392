@@ -17,6 +17,7 @@ public static class AuthenticationTests
 {
     public static async Task<int> Main()
     {
+        await SqlIdentityTests.Run();
         var root = new DirectoryInfo(AppContext.BaseDirectory);
         while (root is not null && !Directory.Exists(Path.Combine(root.FullName, "Identity.API"))) root = root.Parent;
         if (root is null) throw new InvalidOperationException("Cannot locate Identity.API.");

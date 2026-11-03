@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Procurement.DAL.PurchaseOrders;
 using Procurement.DAL.Receiving;
 using Procurement.Models.PurchaseOrders;
@@ -46,7 +47,7 @@ internal static class SqlTransactionTests
             var request = new CreatePurchaseOrder(1, 1, null, "SQL integration", [new(1, 3), new(2, 5)]);
             var failed = false;
             try { await repo.CreateAsync(request, 22, "SQL Test", "CREATE_PO", CancellationToken.None); }
-            catch (SqlException) { failed = true; }
+            catch (DbUpdateException error) when (error.InnerException is SqlException) { failed = true; }
             ProcurementTests.Check(failed, "audit write forced to fail");
             await using (var count = new SqlCommand("SELECT (SELECT COUNT(*) FROM dbo.PurchaseOrder) + (SELECT COUNT(*) FROM dbo.PurchaseOrderLine) + (SELECT COUNT(*) FROM dbo.AuditLog)", connection))
                 ProcurementTests.Check(Convert.ToInt32(await count.ExecuteScalarAsync()) == 0, "audit failure rolls back all PO data");
@@ -62,7 +63,7 @@ internal static class SqlTransactionTests
             await using (var rejectEdit = new SqlCommand("ALTER TABLE dbo.AuditLog ADD CONSTRAINT RejectEditAudit CHECK (Action <> 'UPDATE_PO')", connection)) await rejectEdit.ExecuteNonQueryAsync();
             failed = false;
             try { await repo.UpdateAsync(first, editedRequest, 23, "Editor", CancellationToken.None); }
-            catch (SqlException) { failed = true; }
+            catch (DbUpdateException error) when (error.InnerException is SqlException) { failed = true; }
             var untouched = (await repo.FindAsync(first.PurchaseOrderId, CancellationToken.None))!;
             ProcurementTests.Check(failed && untouched.RowVersion == first.RowVersion && untouched.Lines[0].Quantity == 3, "edit audit failure rolls back header, lines and row version");
             await using (var allowEdit = new SqlCommand("ALTER TABLE dbo.AuditLog DROP CONSTRAINT RejectEditAudit", connection)) await allowEdit.ExecuteNonQueryAsync();
@@ -107,7 +108,7 @@ internal static class SqlTransactionTests
             await using (var rejectCancel = new SqlCommand("ALTER TABLE dbo.AuditLog ADD CONSTRAINT RejectCancelAudit CHECK (Action <> 'CANCEL_PO')", connection)) await rejectCancel.ExecuteNonQueryAsync();
             failed = false;
             try { await repo.TransitionAsync(cancellable, "CANCELLED", "Not needed", new Dictionary<long,int>(), 23, "Editor", CancellationToken.None); }
-            catch (SqlException) { failed = true; }
+            catch (DbUpdateException error) when (error.InnerException is SqlException) { failed = true; }
             var stillDraft = (await repo.FindAsync(cancellable.PurchaseOrderId, CancellationToken.None))!;
             ProcurementTests.Check(failed && stillDraft.Status == "DRAFT" && stillDraft.ClosedAt is null && stillDraft.RowVersion == cancellable.RowVersion, "cancel audit failure rolls back transition");
             await using (var allowCancel = new SqlCommand("ALTER TABLE dbo.AuditLog DROP CONSTRAINT RejectCancelAudit", connection)) await allowCancel.ExecuteNonQueryAsync();

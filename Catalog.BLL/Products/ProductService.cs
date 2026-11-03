@@ -3,18 +3,6 @@ using Catalog.Models.Products;
 
 namespace Catalog.BLL.Products;
 
-public interface IProductRepository
-{
-    Task<ProductPage> ListAsync(ProductQuery query, CancellationToken ct);
-    Task<ProductDetail?> FindAsync(int id, CancellationToken ct);
-    Task<ProductOptions> OptionsAsync(CancellationToken ct);
-    Task<ProductDetail> SaveAsync(int? id, ProductInput input, int actorId, byte[]? rowVersion, CancellationToken ct);
-}
-public sealed class ProductValidationException(string[] errors) : Exception(errors.FirstOrDefault() ?? "Dữ liệu sản phẩm không hợp lệ.")
-{ public string[] Errors { get; } = errors; }
-public sealed class ProductConflictException(string message) : Exception(message);
-public sealed class ProductNotFoundException() : Exception("Không tìm thấy sản phẩm.");
-
 public sealed class ProductService(IProductRepository products)
 {
     public Task<ProductPage> ListAsync(ProductQuery query, CancellationToken ct)

@@ -6,8 +6,6 @@ using Procurement.Models.PurchaseOrders;
 
 namespace Procurement.Excel;
 
-public sealed class WorkbookFormatException(string message) : Exception(message);
-
 /// <summary>Reads only the PurchaseOrder sheet; never evaluates uploaded formulas or writes a PO.</summary>
 public sealed class PurchaseOrderWorkbook : IPurchaseOrderWorkbook
 {

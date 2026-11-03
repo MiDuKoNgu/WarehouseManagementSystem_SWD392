@@ -16,10 +16,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddEwmsServiceSecurity(builder.Configuration);
 builder.Services.AddDbContextFactory<CatalogDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("Catalog") ?? throw new ServiceUnavailableException("Catalog connection is not configured.")));
-builder.Services.AddScoped<IProductRepository, SqlProductRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ProductStorageProfileRepository>();
-builder.Services.AddScoped<CatalogLookupRepository>();
+builder.Services.AddScoped<CatalogRepository>();
 
 var app = builder.Build();
 app.UseEwmsServiceErrors();

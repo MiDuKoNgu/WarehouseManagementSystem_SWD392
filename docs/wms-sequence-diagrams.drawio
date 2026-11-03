@@ -92,7 +92,7 @@
             <mxPoint x="2080" y="4806" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="83" value="Identity.DAL SqlUserRepository" style="rounded=1;fillColor=#ffedd5;strokeColor=#f97316;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;align=center;verticalAlign=middle;" vertex="1" parent="1">
+        <mxCell id="83" value="Identity.DAL UserRepository" style="rounded=1;fillColor=#ffedd5;strokeColor=#f97316;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;align=center;verticalAlign=middle;" vertex="1" parent="1">
           <mxGeometry x="1958" y="120" width="244" height="70" as="geometry" />
         </mxCell>
         <mxCell id="84" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -462,7 +462,7 @@
             <mxPoint x="155" y="4522" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="65" value="RememberMe: persistent cookie 14 ngày; không chọn: session cookie, ticket 8 giờ. UserProfile không chứa PasswordHash. Nguồn: auth-api.ts, AuthController.cs, LoginService.cs, SqlUserRepository.cs, Identity.API/Program.cs." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="65" value="RememberMe: persistent cookie 14 ngày; không chọn: session cookie, ticket 8 giờ. UserProfile không chứa PasswordHash. Nguồn: auth-api.ts, AuthController.cs, LoginService.cs, UserRepository.cs, Identity.API/Program.cs." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="35" y="4658" width="2440" height="62" as="geometry" />
         </mxCell>
       </root>
@@ -539,7 +539,7 @@
             <mxPoint x="1530" y="9908" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="149" value="Identity.DAL → IdentityDB SqlUserRepository / User + Role" style="rounded=1;fillColor=#f3e8ff;strokeColor=#a855f7;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;align=center;verticalAlign=middle;" vertex="1" parent="1">
+        <mxCell id="149" value="Identity.DAL → IdentityDB UserRepository / User + Role" style="rounded=1;fillColor=#f3e8ff;strokeColor=#a855f7;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;align=center;verticalAlign=middle;" vertex="1" parent="1">
           <mxGeometry x="1408" y="120" width="244" height="70" as="geometry" />
         </mxCell>
         <mxCell id="150" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -548,7 +548,7 @@
             <mxPoint x="1805" y="9908" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="151" value="Inventory.DAL SqlInboundRepository / ReceiptQueries" style="rounded=1;fillColor=#ffedd5;strokeColor=#f97316;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;align=center;verticalAlign=middle;" vertex="1" parent="1">
+        <mxCell id="151" value="Inventory.DAL InboundRepository / ReceiptQueries" style="rounded=1;fillColor=#ffedd5;strokeColor=#f97316;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;align=center;verticalAlign=middle;" vertex="1" parent="1">
           <mxGeometry x="1683" y="120" width="244" height="70" as="geometry" />
         </mxCell>
         <mxCell id="152" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -680,7 +680,7 @@
             <mxPoint x="2630" y="1248" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="17" value="Trong List/Detail PO: PurchaseOrderLookupClient.GetOptionsAsync gọi song song Catalog.API (/api/catalog/options) → CatalogLookupRepository → CatalogDB và Warehouse.API (/api/warehouses/options) → WarehouseLookupRepository → WarehouseDB để lấy tên sản phẩm, nhà cung cấp, kho. Nhánh tra cứu phụ được gộp tại ghi chú này." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="17" value="Trong List/Detail PO: PurchaseOrderLookupClient.GetOptionsAsync gọi song song Catalog.API (/api/catalog/options) → CatalogRepository → CatalogDB và Warehouse.API (/api/warehouses/options) → WarehouseRepository → WarehouseDB để lấy tên sản phẩm, nhà cung cấp, kho. Nhánh tra cứu phụ được gộp tại ghi chú này." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="35" y="1312" width="3265" height="62" as="geometry" />
         </mxCell>
         <mxCell id="18" value="14. PO CONFIRMED thuộc kho + dữ liệu lookup" style="endArrow=open;endFill=0;html=0;rounded=0;strokeColor=#64748b;strokeWidth=1.3;dashed=1;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=251;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
@@ -934,7 +934,7 @@
             <mxPoint x="2630" y="4352" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="60" value="53. SqlReceivingReservationRepository.ReserveAsync" style="endArrow=block;endFill=1;html=0;rounded=0;strokeColor=#334155;strokeWidth=1.3;dashed=0;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=251;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
+        <mxCell id="60" value="53. ReceivingReservationRepository.ReserveAsync" style="endArrow=block;endFill=1;html=0;rounded=0;strokeColor=#334155;strokeWidth=1.3;dashed=0;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=251;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="2630" y="4424" as="sourcePoint" />
             <mxPoint x="2905" y="4424" as="targetPoint" />
@@ -1353,7 +1353,7 @@
             <mxPoint x="155" y="9696" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="135" value="Lỗi chính: 400 dữ liệu; 403 kho/quyền/chính sách; 404 không tìm thấy; 409 serial/version/PO xung đột; 503 dịch vụ lỗi. Transaction chưa commit sẽ rollback. Nếu DONE đã commit nhưng Release thất bại, retry complete không nhận hàng lần hai. Nguồn: InboundsController.cs, SqlInboundRepository.cs, ReceivingOrderClient.cs, ReceivingOrdersController.cs." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="135" value="Lỗi chính: 400 dữ liệu; 403 kho/quyền/chính sách; 404 không tìm thấy; 409 serial/version/PO xung đột; 503 dịch vụ lỗi. Transaction chưa commit sẽ rollback. Nếu DONE đã commit nhưng Release thất bại, retry complete không nhận hàng lần hai. Nguồn: InboundsController.cs, InboundRepository.cs, ReceivingOrderClient.cs, ReceivingOrdersController.cs." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="35" y="9760" width="3265" height="62" as="geometry" />
         </mxCell>
       </root>
@@ -1442,7 +1442,7 @@
             <mxPoint x="2080" y="6588" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="107" value="Inventory.DAL SqlPutawayRepository" style="rounded=1;fillColor=#ffedd5;strokeColor=#f97316;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;align=center;verticalAlign=middle;" vertex="1" parent="1">
+        <mxCell id="107" value="Inventory.DAL PutawayRepository" style="rounded=1;fillColor=#ffedd5;strokeColor=#f97316;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;align=center;verticalAlign=middle;" vertex="1" parent="1">
           <mxGeometry x="1958" y="120" width="244" height="70" as="geometry" />
         </mxCell>
         <mxCell id="108" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -1508,7 +1508,7 @@
             <mxPoint x="1255" y="510" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="7" value="5. SqlUserRepository.FindByIdAsync → SELECT User JOIN Role" style="endArrow=block;endFill=1;html=0;rounded=0;strokeColor=#334155;strokeWidth=1.3;dashed=0;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=251;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
+        <mxCell id="7" value="5. UserRepository.FindByIdAsync → SELECT User JOIN Role" style="endArrow=block;endFill=1;html=0;rounded=0;strokeColor=#334155;strokeWidth=1.3;dashed=0;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=251;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1255" y="582" as="sourcePoint" />
             <mxPoint x="1530" y="582" as="targetPoint" />
@@ -1987,7 +1987,7 @@
             <mxPoint x="155" y="6352" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="89" value="Putaway không tăng tồn kho lần nữa; chỉ gán vị trí. Nếu bất kỳ ghi movement/audit/update nào lỗi trước commit, toàn bộ transaction rollback. Schema có claim/stocktake chưa tích hợp → 503. Nguồn: PutawayController.cs, PutawayService.cs, SqlPutawayRepository.cs, PutawayRules.cs." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="89" value="Putaway không tăng tồn kho lần nữa; chỉ gán vị trí. Nếu bất kỳ ghi movement/audit/update nào lỗi trước commit, toàn bộ transaction rollback. Schema có claim/stocktake chưa tích hợp → 503. Nguồn: PutawayController.cs, PutawayService.cs, PutawayRepository.cs, PutawayRules.cs." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="35" y="6440" width="3265" height="62" as="geometry" />
         </mxCell>
       </root>
@@ -2067,7 +2067,7 @@
             <mxPoint x="1530" y="7598" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="121" value="Identity.DAL SqlUserRepository" style="rounded=1;fillColor=#ffedd5;strokeColor=#f97316;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;align=center;verticalAlign=middle;" vertex="1" parent="1">
+        <mxCell id="121" value="Identity.DAL UserRepository" style="rounded=1;fillColor=#ffedd5;strokeColor=#f97316;fontSize=14;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;align=center;verticalAlign=middle;" vertex="1" parent="1">
           <mxGeometry x="1408" y="120" width="244" height="70" as="geometry" />
         </mxCell>
         <mxCell id="122" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -2840,7 +2840,7 @@
             <mxPoint x="1770" y="16137" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="225" value="Procurement.DAL SqlPurchaseOrderRepository" style="rounded=1;fillColor=#e0e7ff;strokeColor=#64748b;fontSize=13;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="225" value="Procurement.DAL PurchaseOrderRepository" style="rounded=1;fillColor=#e0e7ff;strokeColor=#64748b;fontSize=13;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="1648" y="115" width="244" height="87" as="geometry" />
         </mxCell>
         <mxCell id="226" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -2858,7 +2858,7 @@
             <mxPoint x="2310" y="16137" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="229" value="Identity.API + DAL AuthController / SessionValidation SqlUserRepository" style="rounded=1;fillColor=#e0e7ff;strokeColor=#64748b;fontSize=13;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="229" value="Identity.API + DAL AuthController / SessionValidation UserRepository" style="rounded=1;fillColor=#e0e7ff;strokeColor=#64748b;fontSize=13;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="2188" y="115" width="244" height="87" as="geometry" />
         </mxCell>
         <mxCell id="230" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -2876,7 +2876,7 @@
             <mxPoint x="2850" y="16137" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="233" value="Catalog.API + DAL CatalogOptionsController CatalogLookupRepository" style="rounded=1;fillColor=#e0e7ff;strokeColor=#64748b;fontSize=13;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="233" value="Catalog.API + DAL CatalogOptionsController CatalogRepository" style="rounded=1;fillColor=#e0e7ff;strokeColor=#64748b;fontSize=13;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="2728" y="115" width="244" height="87" as="geometry" />
         </mxCell>
         <mxCell id="234" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -2894,7 +2894,7 @@
             <mxPoint x="3390" y="16137" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="237" value="Warehouse.API + DAL WarehouseOptionsController WarehouseLookupRepository" style="rounded=1;fillColor=#e0e7ff;strokeColor=#64748b;fontSize=13;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="237" value="Warehouse.API + DAL WarehouseOptionsController WarehouseRepository" style="rounded=1;fillColor=#e0e7ff;strokeColor=#64748b;fontSize=13;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="3268" y="115" width="244" height="87" as="geometry" />
         </mxCell>
         <mxCell id="238" value="" style="endArrow=none;dashed=1;strokeColor=#94a3b8;" edge="1" parent="1">
@@ -3005,7 +3005,7 @@
             <mxPoint x="2850" y="1015" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="13" value="11. CatalogLookupRepository.GetAsync → SELECT danh mục" style="endArrow=block;endFill=1;dashed=0;strokeColor=#475569;strokeWidth=1.3;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=246;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
+        <mxCell id="13" value="11. CatalogRepository.GetAsync → SELECT danh mục" style="endArrow=block;endFill=1;dashed=0;strokeColor=#475569;strokeWidth=1.3;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=246;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="2850" y="1089" as="sourcePoint" />
             <mxPoint x="3120" y="1089" as="targetPoint" />
@@ -3032,7 +3032,7 @@
             <mxPoint x="3390" y="1376" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="18" value="15. WarehouseLookupRepository.GetAsync → SELECT kho" style="endArrow=block;endFill=1;dashed=0;strokeColor=#475569;strokeWidth=1.3;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=246;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
+        <mxCell id="18" value="15. WarehouseRepository.GetAsync → SELECT kho" style="endArrow=block;endFill=1;dashed=0;strokeColor=#475569;strokeWidth=1.3;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=246;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="3390" y="1450" as="sourcePoint" />
             <mxPoint x="3660" y="1450" as="targetPoint" />
@@ -3467,7 +3467,7 @@
             <mxPoint x="2310" y="7024" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="93" value="82. SqlUserRepository.FindByIdAsync → SELECT User JOIN Role" style="endArrow=block;endFill=1;dashed=0;strokeColor=#475569;strokeWidth=1.3;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=246;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
+        <mxCell id="93" value="82. UserRepository.FindByIdAsync → SELECT User JOIN Role" style="endArrow=block;endFill=1;dashed=0;strokeColor=#475569;strokeWidth=1.3;fontSize=13;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=246;verticalAlign=bottom;spacingBottom=7;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="2310" y="7098" as="sourcePoint" />
             <mxPoint x="2580" y="7098" as="targetPoint" />
@@ -4129,7 +4129,7 @@
         <mxCell id="208" value="finally: Entry.Gate.Release() cho cả nhánh thành công/lỗi. Preview chỉ lưu bộ nhớ (singleton), không ghi PO. Import confirm chống tạo trùng bằng Gate + CreatedId + khóa/importKey bền vững trong AuditLog. Muốn DRAFT → CONFIRMED phải gọi /{id}/confirm riêng." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=14;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="30" y="15889" width="4830" height="65" as="geometry" />
         </mxCell>
-        <mxCell id="209" value="Lỗi chính: 400 validation/file format; 401/403 session/role; 404 PO không có; 409 version/state/reservation/preview; 503 nguồn dữ liệu lỗi. Proxy có thể trả 502/504 khi upstream mất kết nối. Nguồn: PurchaseOrdersController.cs, PurchaseOrderService.cs, SqlPurchaseOrderRepository.cs, PurchaseOrderLookupClient.cs, PurchaseOrderWorkbook.cs." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=14;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="209" value="Lỗi chính: 400 validation/file format; 401/403 session/role; 404 PO không có; 409 version/state/reservation/preview; 503 nguồn dữ liệu lỗi. Proxy có thể trả 502/504 khi upstream mất kết nối. Nguồn: PurchaseOrdersController.cs, PurchaseOrderService.cs, PurchaseOrderRepository.cs, PurchaseOrderLookupClient.cs, PurchaseOrderWorkbook.cs." style="rounded=1;fillColor=#fff7d6;strokeColor=#e9c46a;align=left;spacing=12;fontSize=14;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="30" y="15984" width="4830" height="65" as="geometry" />
         </mxCell>
       </root>

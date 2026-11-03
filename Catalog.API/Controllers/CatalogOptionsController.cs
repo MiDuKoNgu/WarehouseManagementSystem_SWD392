@@ -6,7 +6,7 @@ namespace Catalog.API.Controllers;
 
 [ApiController, Route("api/catalog/options")]
 [Authorize(Roles = "PURCHASING_STAFF,ADMIN,WAREHOUSE_STAFF")]
-public sealed class CatalogOptionsController(CatalogLookupRepository catalog) : ControllerBase
+public sealed class CatalogOptionsController(CatalogRepository catalog) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken cancellationToken) => Ok(await catalog.GetAsync(cancellationToken));

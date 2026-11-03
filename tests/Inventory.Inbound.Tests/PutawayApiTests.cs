@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Inventory.Inbound.Tests;
 
-internal static class PutawayApiTests
+internal static partial class PutawayApiTests
 {
     public static async Task Run()
     {
@@ -65,30 +65,4 @@ internal static class PutawayApiTests
     { var client = factory.CreateClient(new() { AllowAutoRedirect = false }); client.DefaultRequestHeaders.Add("Cookie", "EWMS.Session=" + role); return client; }
     private static async Task Status(HttpResponseMessage response, int expected, string label)
         => InboundTests.Check((int)response.StatusCode == expected, $"Putaway {label}: expected {expected}, got {(int)response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
-    private sealed class Identity : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
-        {
-            if (request.RequestUri!.AbsolutePath.EndsWith("validate-csrf")) return Task.FromResult(new HttpResponseMessage(
-                request.Headers.TryGetValues("X-CSRF-TOKEN", out var values) && values.Single() == "valid" ? HttpStatusCode.NoContent : HttpStatusCode.BadRequest));
-            var session = request.Headers.GetValues("Cookie").Single();
-            var role = session.Contains("admin") ? "ADMIN" : session.Contains("buyer") ? "PURCHASING_STAFF" : "WAREHOUSE_STAFF";
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(new
-                { userId = 22, username = "warehouse", fullName = "Warehouse API Test", role, warehouseId = session.Contains("unassigned") ? (int?)null : 1 }) });
-        }
-    }
-    private sealed class Repository : IPutawayRepository
-    {
-        public PutawayActor? LastActor; public (string?, int, int) LastQuery; public string? LastSerial; public int Writes; public PutawayException? Error;
-        private static readonly PutawaySerial Serial = new(1, "TEST", 1, "IN_WAREHOUSE", "GOOD", false, 1, null, null,
-            Convert.ToBase64String(new byte[8]), new(1, "SKU", "TV", 1, "TV", 1, "Brand", "ACTIVE", 50, 50, 50, 10), "Kho A", 1, "IN-1", DateTime.UtcNow, InboundStatus: "DONE");
-        public Task<PutawayPendingPage> PendingAsync(PutawayActor actor, string? search, int page, int pageSize, CancellationToken ct)
-        { LastActor = actor; LastQuery = (search, page, pageSize); return Task.FromResult(new PutawayPendingPage([Serial], 1, page, pageSize)); }
-        public Task<PutawaySerial> FindAsync(PutawayActor actor, long? id, string? serial, CancellationToken ct)
-        { LastActor = actor; LastSerial = serial; return Task.FromResult(Serial); }
-        public Task<PutawaySuggestions> SuggestionsAsync(PutawayActor actor, long id, CancellationToken ct)
-        { LastActor = actor; return Task.FromResult(new PutawaySuggestions(Serial, [])); }
-        public Task<PutawayResult> ConfirmAsync(PutawayActor actor, ConfirmPutaway request, CancellationToken ct)
-        { LastActor = actor; if (Error is not null) throw Error; Writes++; return Task.FromResult(new PutawayResult(1, "TEST", 3, "Kho A → A → Ô 1", DateTime.UtcNow, actor.UserId, actor.Name, Serial.RowVersion)); }
-    }
 }

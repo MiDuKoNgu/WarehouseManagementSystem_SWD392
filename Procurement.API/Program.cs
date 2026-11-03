@@ -23,8 +23,8 @@ builder.Services.AddHttpClient("purchase-order-lookups", client => client.Timeou
 builder.Services.AddScoped<IPurchaseOrderLookup, PurchaseOrderLookupClient>();
 builder.Services.AddDbContextFactory<ProcurementDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("Procurement") ?? throw new ServiceUnavailableException("Procurement connection is not configured.")));
-builder.Services.AddScoped<IPurchaseOrderRepository, SqlPurchaseOrderRepository>();
-builder.Services.AddScoped<SqlReceivingReservationRepository>();
+builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
+builder.Services.AddScoped<ReceivingReservationRepository>();
 builder.Services.AddSingleton<IPurchaseOrderWorkbook, PurchaseOrderWorkbook>();
 builder.Services.AddSingleton<ImportPreviewStore>();
 builder.Services.AddScoped<PurchaseOrderService>();

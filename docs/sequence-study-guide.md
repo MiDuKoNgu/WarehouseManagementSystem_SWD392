@@ -64,7 +64,7 @@ Model gốc mô tả dữ liệu; lifeline sequence mô tả đối tượng x�
 | SD07.ORDER | InboundsController + poId | ReceiptOrder đúng kho | Lookup tên từ Catalog/Warehouse |
 | SD07.LOAD | InboundsController + inboundId/actor | ReceiptDetail | Header + ORDER + progress/items + policy |
 | SD09.RELEASE | InboundsController + inboundId/poId | Reservation được RELEASED hoặc lỗi | Chỉ sau proof terminal; không rollback Inbound đã commit |
-| SD10.READ_CONTEXT | SqlPutawayRepository, actor/id, locked, transaction? | Serial + warehouse snapshot | Occupants được đọc riêng; locked=true cho SD11 |
+| SD10.READ_CONTEXT | PutawayRepository, actor/id, locked, transaction? | Serial + warehouse snapshot | Occupants được đọc riêng; locked=true cho SD11 |
 | SD12.SOURCE_READ | AuditGateway, source, mode=page/detail/actions | Page/detail/actions | Inventory và Procurement dùng cùng cấu trúc |
 | SD12.EMPLOYEES | AuditGateway + cookie | AuditEmployee[] | Identity kiểm ADMIN |
 
@@ -104,7 +104,7 @@ Ký hiệu lifeline: `f` = Frontend / request / authApi; `g` = WMS.API / ApiServ
 
 **Hậu điều kiện:** Cho phép action chạy hoặc kết thúc bằng 400/401/403/503.
 
-**Lifeline:** Service nhận request / Middleware / filter → IdentitySessionHandler / SessionCsrfFilter → Identity.API / AuthController / Cookie Auth → SessionValidation → SqlUserRepository → IdentityDB / User + Role. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Service nhận request / Middleware / filter → IdentitySessionHandler / SessionCsrfFilter → Identity.API / AuthController / Cookie Auth → SessionValidation → UserRepository → IdentityDB / User + Role. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -127,7 +127,7 @@ Ký hiệu lifeline: `f` = Frontend / request / authApi; `g` = WMS.API / ApiServ
 17. `a` xử lý: antiforgery.IsRequestValidAsync(HttpContext).
 18. **Nhánh lỗi — Phiên/CSRF sai:** 400/401/403 → filter trả lỗi về caller, dừng action.
 
-Ký hiệu lifeline: `c` = Service nhận request / Middleware / filter; `h` = IdentitySessionHandler / SessionCsrfFilter; `a` = Identity.API / AuthController / Cookie Auth; `v` = SessionValidation; `r` = SqlUserRepository; `d` = IdentityDB / User + Role.
+Ký hiệu lifeline: `c` = Service nhận request / Middleware / filter; `h` = IdentitySessionHandler / SessionCsrfFilter; `a` = Identity.API / AuthController / Cookie Auth; `v` = SessionValidation; `r` = UserRepository; `d` = IdentityDB / User + Role.
 
 **Ghi chú nghiệp vụ:**
 
@@ -143,7 +143,7 @@ Ký hiệu lifeline: `c` = Service nhận request / Middleware / filter; `h` = I
 
 **Hậu điều kiện:** Thành công: cookie EWMS.Session + UserProfile; frontend chuyển trang. Sai: không tạo phiên.
 
-**Lifeline:** Người dùng → Frontend → WMS.API / ApiServiceProxy → Identity.API / AuthController → LoginService → PasswordService → SqlUserRepository → IdentityDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Người dùng → Frontend → WMS.API / ApiServiceProxy → Identity.API / AuthController → LoginService → PasswordService → UserRepository → IdentityDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -172,13 +172,13 @@ Ký hiệu lifeline: `c` = Service nhận request / Middleware / filter; `h` = I
 23. `c` xử lý: Tạo claims; HttpContext.SignInAsync() → cookie EWMS.Session.
 24. `f` xử lý: AuthProvider.setUser(profile); navigate theo role.
 
-Ký hiệu lifeline: `u` = Người dùng; `f` = Frontend; `g` = WMS.API / ApiServiceProxy; `c` = Identity.API / AuthController; `s` = LoginService; `p` = PasswordService; `r` = SqlUserRepository; `d` = IdentityDB.
+Ký hiệu lifeline: `u` = Người dùng; `f` = Frontend; `g` = WMS.API / ApiServiceProxy; `c` = Identity.API / AuthController; `s` = LoginService; `p` = PasswordService; `r` = UserRepository; `d` = IdentityDB.
 
 **Ghi chú nghiệp vụ:**
 
 - Login chưa có phiên nên không ref SD02. RememberMe: 14 ngày persistent; không chọn: session cookie, ticket 8 giờ. Claims và cookie là xử lý của controller/framework, không phải model User.
 
-**Nguồn code:** [frontend/src/features/auth/components/login-form.tsx](../frontend/src/features/auth/components/login-form.tsx), [Identity.API/Controllers/AuthController.cs](../Identity.API/Controllers/AuthController.cs), [Identity.BLL/Authentication/LoginService.cs](../Identity.BLL/Authentication/LoginService.cs), [Identity.DAL/Repositories/SqlUserRepository.cs](../Identity.DAL/Repositories/SqlUserRepository.cs).
+**Nguồn code:** [frontend/src/features/auth/components/login-form.tsx](../frontend/src/features/auth/components/login-form.tsx), [Identity.API/Controllers/AuthController.cs](../Identity.API/Controllers/AuthController.cs), [Identity.BLL/Authentication/LoginService.cs](../Identity.BLL/Authentication/LoginService.cs), [Identity.DAL/Repositories/UserRepository.cs](../Identity.DAL/Repositories/UserRepository.cs).
 
 ### SD04 — Tạo / sửa Purchase Order
 
@@ -188,7 +188,7 @@ Ký hiệu lifeline: `u` = Người dùng; `f` = Frontend; `g` = WMS.API / ApiSe
 
 **Hậu điều kiện:** CREATE trả 201 PO DRAFT; UPDATE trả 200 PO và version mới. Header, lines và audit cùng transaction.
 
-**Lifeline:** Người dùng → Frontend → WMS.API / ApiServiceProxy → Procurement.API / PurchaseOrdersController → PurchaseOrderService → PurchaseOrderLookupClient → Catalog / Warehouse API / Lookup repositories → CatalogDB / WarehouseDB → SqlPurchaseOrderRepository → ProcurementDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Người dùng → Frontend → WMS.API / ApiServiceProxy → Procurement.API / PurchaseOrdersController → PurchaseOrderService → PurchaseOrderLookupClient → Catalog / Warehouse API / Lookup repositories → CatalogDB / WarehouseDB → PurchaseOrderRepository → ProcurementDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -206,10 +206,10 @@ Ký hiệu lifeline: `u` = Người dùng; `f` = Frontend; `g` = WMS.API / ApiSe
 12. `s → l`: GetOptionsAsync().
 13. **par [Catalog và Warehouse gọi đồng thời]**.
 14. `l → x`: GET /api/catalog/options + cookie.
-15. `x → xd`: CatalogLookupRepository.GetAsync → SELECT supplier/product.
+15. `x → xd`: CatalogRepository.GetAsync → SELECT supplier/product.
 16. **and [Warehouse]**.
 17. `l → x`: GET /api/warehouses/options + cookie.
-18. `x → xd`: WarehouseLookupRepository.GetAsync → SELECT kho hoạt động.
+18. `x → xd`: WarehouseRepository.GetAsync → SELECT kho hoạt động.
 19. `s` xử lý: Validate(request/options); Normalize(note) 1..500 dòng; quantity>0; đúng supplier; ngày hợp lệ.
 20. **Nhánh lỗi — Dữ liệu sai:** 400 + errors.
 21. **alt [CREATE; dùng lại cho import]**.
@@ -222,14 +222,14 @@ Ký hiệu lifeline: `u` = Người dùng; `f` = Frontend; `g` = WMS.API / ApiSe
 28. `s → r`: UpdateAsync(expected, normalizedRequest, actor).
 29. `r → d`: BEGIN; LockAndCheck RowVersion/DRAFT; UPDATE header + INSERT/UPDATE/DELETE lines; AuditLog(UPDATE_PO); COMMIT.
 
-Ký hiệu lifeline: `u` = Người dùng; `f` = Frontend; `g` = WMS.API / ApiServiceProxy; `c` = Procurement.API / PurchaseOrdersController; `s` = PurchaseOrderService; `l` = PurchaseOrderLookupClient; `x` = Catalog / Warehouse API / Lookup repositories; `xd` = CatalogDB / WarehouseDB; `r` = SqlPurchaseOrderRepository; `d` = ProcurementDB.
+Ký hiệu lifeline: `u` = Người dùng; `f` = Frontend; `g` = WMS.API / ApiServiceProxy; `c` = Procurement.API / PurchaseOrdersController; `s` = PurchaseOrderService; `l` = PurchaseOrderLookupClient; `x` = Catalog / Warehouse API / Lookup repositories; `xd` = CatalogDB / WarehouseDB; `r` = PurchaseOrderRepository; `d` = ProcurementDB.
 
 **Ghi chú nghiệp vụ:**
 
 - Nếu đã có importKey: commit, đọc PO cũ và trả lại; bỏ qua INSERT bên dưới. Nhánh này chống tạo trùng khi retry import.
 - UPDATE gọi GetCreatorNameAsync qua Identity trước khi ghi; CREATE dùng tên người tạo từ claims. WRITE_CREATE chỉ đại diện phần repository, không gọi lại frontend/controller. Mỗi lần gọi có transaction riêng.
 
-**Nguồn code:** [Procurement.API/Controllers/PurchaseOrdersController.cs](../Procurement.API/Controllers/PurchaseOrdersController.cs), [Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs](../Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs), [Procurement.API/Clients/PurchaseOrderLookupClient.cs](../Procurement.API/Clients/PurchaseOrderLookupClient.cs), [Procurement.DAL/PurchaseOrders/SqlPurchaseOrderRepository.cs](../Procurement.DAL/PurchaseOrders/SqlPurchaseOrderRepository.cs).
+**Nguồn code:** [Procurement.API/Controllers/PurchaseOrdersController.cs](../Procurement.API/Controllers/PurchaseOrdersController.cs), [Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs](../Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs), [Procurement.API/Clients/PurchaseOrderLookupClient.cs](../Procurement.API/Clients/PurchaseOrderLookupClient.cs), [Procurement.DAL/PurchaseOrders/PurchaseOrderRepository.cs](../Procurement.DAL/PurchaseOrders/PurchaseOrderRepository.cs).
 
 ### SD05 — Import Purchase Order từ Excel
 
@@ -239,7 +239,7 @@ Ký hiệu lifeline: `u` = Người dùng; `f` = Frontend; `g` = WMS.API / ApiSe
 
 **Hậu điều kiện:** Preview không tạo PO. Confirm import trả PO DRAFT, retry không tạo thêm với cùng token/key.
 
-**Lifeline:** Nhân viên mua hàng → Frontend / purchaseOrderApi → WMS.API / ApiServiceProxy → PurchaseOrdersController → PurchaseOrderService → PurchaseOrderWorkbook → ImportPreviewStore / Entry → SqlPurchaseOrderRepository → ProcurementDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Nhân viên mua hàng → Frontend / purchaseOrderApi → WMS.API / ApiServiceProxy → PurchaseOrdersController → PurchaseOrderService → PurchaseOrderWorkbook → ImportPreviewStore / Entry → PurchaseOrderRepository → ProcurementDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -276,7 +276,7 @@ Ký hiệu lifeline: `u` = Người dùng; `f` = Frontend; `g` = WMS.API / ApiSe
 31. `s` xử lý: entry.CreatedId = order.PurchaseOrderId.
 32. `s` xử lý: finally: entry.Gate.Release() kể cả khi có lỗi.
 
-Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrderApi; `g` = WMS.API / ApiServiceProxy; `c` = PurchaseOrdersController; `s` = PurchaseOrderService; `w` = PurchaseOrderWorkbook; `p` = ImportPreviewStore / Entry; `r` = SqlPurchaseOrderRepository; `d` = ProcurementDB.
+Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrderApi; `g` = WMS.API / ApiServiceProxy; `c` = PurchaseOrdersController; `s` = PurchaseOrderService; `w` = PurchaseOrderWorkbook; `p` = ImportPreviewStore / Entry; `r` = PurchaseOrderRepository; `d` = ProcurementDB.
 
 **Ghi chú nghiệp vụ:**
 
@@ -285,7 +285,7 @@ Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrder
 - service.FindAsync bổ sung ReceivingSummary, options và tên người tạo như SD06.RECEIVING / SD04.OPTIONS; không INSERT thêm.
 - Confirm import tạo DRAFT. DRAFT → CONFIRMED là SD06, không phải thao tác này. Lỗi workbook/validation=400; preview conflict=409; nguồn dịch vụ=503.
 
-**Nguồn code:** [Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs](../Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs), [Procurement.Excel/PurchaseOrderWorkbook.cs](../Procurement.Excel/PurchaseOrderWorkbook.cs), [Procurement.DAL/PurchaseOrders/SqlPurchaseOrderRepository.cs](../Procurement.DAL/PurchaseOrders/SqlPurchaseOrderRepository.cs).
+**Nguồn code:** [Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs](../Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs), [Procurement.Excel/PurchaseOrderWorkbook.cs](../Procurement.Excel/PurchaseOrderWorkbook.cs), [Procurement.DAL/PurchaseOrders/PurchaseOrderRepository.cs](../Procurement.DAL/PurchaseOrders/PurchaseOrderRepository.cs).
 
 ### SD06 — Xác nhận / hủy / đóng Purchase Order
 
@@ -295,7 +295,7 @@ Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrder
 
 **Hậu điều kiện:** PO chuyển CONFIRMED/CANCELLED/CLOSED hoặc trả lỗi; audit ghi cùng transaction.
 
-**Lifeline:** Nhân viên mua hàng → Frontend / purchaseOrderApi → WMS.API / ApiServiceProxy → PurchaseOrdersController → PurchaseOrderService → PurchaseOrderLookupClient → Inventory.API / ReceivingSummaryController → ReceivingSummaryRepository → InventoryDB → SqlPurchaseOrderRepository → ProcurementDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Nhân viên mua hàng → Frontend / purchaseOrderApi → WMS.API / ApiServiceProxy → PurchaseOrdersController → PurchaseOrderService → PurchaseOrderLookupClient → Inventory.API / ReceivingSummaryController → ReceivingSummaryRepository → InventoryDB → PurchaseOrderRepository → ProcurementDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -316,7 +316,7 @@ Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrder
 15. `ir → idb`: SELECT Inbound; đếm serial từ InboundItem + SerialItem.
 16. `s` xử lý: ValidateReceiving(order, receiving).
 17. **ref SD04.OPTIONS**: GetOptionsAsync; CONFIRM dùng để Validate lại PO.
-18. `s` xử lý: Lấy tên người tạo qua lookup.GetCreatorNameAsync (Identity.API → SqlUserRepository → IdentityDB).
+18. `s` xử lý: Lấy tên người tạo qua lookup.GetCreatorNameAsync (Identity.API → UserRepository → IdentityDB).
 19. `s → r`: TransitionAsync(expected, targetStatus, reason, closedQuantities, actor).
 20. `r → d`: BEGIN; LockAndCheck: SELECT PO WITH(UPDLOCK,HOLDLOCK).
 21. `d` xử lý: Kiểm lại RowVersion và chuyển trạng thái hợp lệ.
@@ -327,14 +327,14 @@ Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrder
 26. `d` xử lý: Kiểm closedQuantities; UPDATE PurchaseOrderLine.ClosedQuantity.
 27. `d` xử lý: UPDATE PO status/timestamps/reason; INSERT AuditLog(CONFIRM_PO/CANCEL_PO/CLOSE_PO).
 
-Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrderApi; `g` = WMS.API / ApiServiceProxy; `c` = PurchaseOrdersController; `s` = PurchaseOrderService; `l` = PurchaseOrderLookupClient; `ic` = Inventory.API / ReceivingSummaryController; `ir` = ReceivingSummaryRepository; `idb` = InventoryDB; `r` = SqlPurchaseOrderRepository; `d` = ProcurementDB.
+Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrderApi; `g` = WMS.API / ApiServiceProxy; `c` = PurchaseOrdersController; `s` = PurchaseOrderService; `l` = PurchaseOrderLookupClient; `ic` = Inventory.API / ReceivingSummaryController; `ir` = ReceivingSummaryRepository; `idb` = InventoryDB; `r` = PurchaseOrderRepository; `d` = ProcurementDB.
 
 **Ghi chú nghiệp vụ:**
 
 - CONFIRM: DRAFT, chưa có Inbound, Validate lại PO. CANCEL: DRAFT/CONFIRMED, chưa có bất kỳ Inbound. CLOSE: CONFIRMED, không còn Inbound mở; closedQuantity=ordered−received. Các điều kiện không đạt → 400/409, không ghi.
 - Không vẽ ba sequence trùng nhau: thay action, điều kiện và targetStatus theo bảng trên. Update PO dùng SD04, vì sửa dòng hàng khác TransitionAsync.
 
-**Nguồn code:** [Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs](../Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs), [Procurement.DAL/PurchaseOrders/SqlPurchaseOrderRepository.cs](../Procurement.DAL/PurchaseOrders/SqlPurchaseOrderRepository.cs), [Inventory.DAL/Receiving/ReceivingSummaryRepository.cs](../Inventory.DAL/Receiving/ReceivingSummaryRepository.cs).
+**Nguồn code:** [Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs](../Procurement.BLL/PurchaseOrders/PurchaseOrderService.cs), [Procurement.DAL/PurchaseOrders/PurchaseOrderRepository.cs](../Procurement.DAL/PurchaseOrders/PurchaseOrderRepository.cs), [Inventory.DAL/Receiving/ReceivingSummaryRepository.cs](../Inventory.DAL/Receiving/ReceivingSummaryRepository.cs).
 
 ### SD07 — Tạo phiếu Inbound từ PO
 
@@ -344,7 +344,7 @@ Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrder
 
 **Hậu điều kiện:** Phiếu DRAFT + reservation; token trùng hợp lệ trả lại phiếu cũ.
 
-**Lifeline:** Nhân viên kho → Frontend / inboundApi → WMS.API / ApiServiceProxy → Inventory.API / InboundsController → SqlInboundRepository → InventoryDB → ReceivingOrderClient → ReceivingOrdersController → Procurement repositories → ProcurementDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Nhân viên kho → Frontend / inboundApi → WMS.API / ApiServiceProxy → Inventory.API / InboundsController → InboundRepository → InventoryDB → ReceivingOrderClient → ReceivingOrdersController → Procurement repositories → ProcurementDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -369,7 +369,7 @@ Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrder
 19. `c → l`: ReserveAsync(poId, token).
 20. `l → pc`: POST /api/receiving-orders/{id}/reserve.
 21. **ref SD02**: WAREHOUSE_STAFF; requireCsrf=true (header chuyển tiếp).
-22. `pc → pr`: SqlReceivingReservationRepository.ReserveAsync.
+22. `pc → pr`: ReceivingReservationRepository.ReserveAsync.
 23. `pr → pd`: BEGIN; khóa PO; INSERT ReceivingReservation; Touch PO RowVersion; COMMIT.
 24. `c → r`: CreateAsync(order, note, actor, token).
 25. `r → d`: BEGIN + sp_getapplock EWMS:InboundWrite; kiểm token/draft/progress; INSERT Inbound(DRAFT); AuditLog(INBOUND_CREATED); COMMIT.
@@ -380,14 +380,14 @@ Ký hiệu lifeline: `u` = Nhân viên mua hàng; `f` = Frontend / purchaseOrder
 30. `r → d`: SELECT tiến độ + InboundItem hoạt động.
 31. `c` xử lý: new ReceiptDetail(header, order, progress, items, policy).
 
-Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = WMS.API / ApiServiceProxy; `c` = Inventory.API / InboundsController; `r` = SqlInboundRepository; `d` = InventoryDB; `l` = ReceivingOrderClient; `pc` = ReceivingOrdersController; `pr` = Procurement repositories; `pd` = ProcurementDB.
+Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = WMS.API / ApiServiceProxy; `c` = Inventory.API / InboundsController; `r` = InboundRepository; `d` = InventoryDB; `l` = ReceivingOrderClient; `pc` = ReceivingOrdersController; `pr` = Procurement repositories; `pd` = ProcurementDB.
 
 **Ghi chú nghiệp vụ:**
 
 - Nếu token đã có phiếu hợp lệ: ref SD07.LOAD rồi trả 200; bỏ qua reserve/create. Các bước tiếp theo chỉ chạy khi token chưa có.
 - Nếu CreateAsync ném ReceiptException: AbortCreationAsync khóa cùng phạm vi để chặn retry muộn. Khi có bằng chứng terminal, ref SD09.RELEASE để giải phóng reservation, rồi trả lỗi.
 
-**Nguồn code:** [Inventory.API/Controllers/InboundsController.cs](../Inventory.API/Controllers/InboundsController.cs), [Inventory.API/Clients/ReceivingOrderClient.cs](../Inventory.API/Clients/ReceivingOrderClient.cs), [Inventory.DAL/Inbound/SqlInboundRepository.cs](../Inventory.DAL/Inbound/SqlInboundRepository.cs), [Procurement.API/Controllers/ReceivingOrdersController.cs](../Procurement.API/Controllers/ReceivingOrdersController.cs).
+**Nguồn code:** [Inventory.API/Controllers/InboundsController.cs](../Inventory.API/Controllers/InboundsController.cs), [Inventory.API/Clients/ReceivingOrderClient.cs](../Inventory.API/Clients/ReceivingOrderClient.cs), [Inventory.DAL/Inbound/InboundRepository.cs](../Inventory.DAL/Inbound/InboundRepository.cs), [Procurement.API/Controllers/ReceivingOrdersController.cs](../Procurement.API/Controllers/ReceivingOrdersController.cs).
 
 ### SD08 — Thêm / sửa / xóa serial trong Inbound
 
@@ -397,7 +397,7 @@ Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = W
 
 **Hậu điều kiện:** Item được thêm/sửa/vô hiệu hóa; phiếu có version mới. Chưa tạo SerialItem thật.
 
-**Lifeline:** Nhân viên kho → Frontend / inboundApi → WMS.API / ApiServiceProxy → InboundsController → InboundRules → SqlInboundRepository → InventoryDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Nhân viên kho → Frontend / inboundApi → WMS.API / ApiServiceProxy → InboundsController → InboundRules → InboundRepository → InventoryDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -424,13 +424,13 @@ Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = W
 21. `d` xử lý: Touch Inbound để đổi RowVersion; AuditLog(INBOUND_SERIAL_ADDED / UPDATED / REMOVED).
 22. **ref SD07.LOAD**: Load(id) lấy ReceiptDetail + RowVersion mới.
 
-Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = WMS.API / ApiServiceProxy; `c` = InboundsController; `b` = InboundRules; `r` = SqlInboundRepository; `d` = InventoryDB.
+Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = WMS.API / ApiServiceProxy; `c` = InboundsController; `b` = InboundRules; `r` = InboundRepository; `d` = InventoryDB.
 
 **Ghi chú nghiệp vụ:**
 
 - Không vẽ ba cấu trúc CRUD lặp lại. REMOVE không gọi InboundRules.Validate(request) và không lấy PO; vẫn kiểm DRAFT/version. Save chỉ ghi InboundItem; SerialItem được tạo ở SD09 khi complete.
 
-**Nguồn code:** [Inventory.API/Controllers/InboundsController.cs](../Inventory.API/Controllers/InboundsController.cs), [Inventory.BLL/Inbound/InboundRules.cs](../Inventory.BLL/Inbound/InboundRules.cs), [Inventory.DAL/Inbound/SqlInboundRepository.cs](../Inventory.DAL/Inbound/SqlInboundRepository.cs).
+**Nguồn code:** [Inventory.API/Controllers/InboundsController.cs](../Inventory.API/Controllers/InboundsController.cs), [Inventory.BLL/Inbound/InboundRules.cs](../Inventory.BLL/Inbound/InboundRules.cs), [Inventory.DAL/Inbound/InboundRepository.cs](../Inventory.DAL/Inbound/InboundRepository.cs).
 
 ### SD09 — Hoàn tất / hủy Inbound và release reservation
 
@@ -440,7 +440,7 @@ Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = W
 
 **Hậu điều kiện:** DONE tạo hàng chờ putaway, hoặc CANCELLED; release reservation sau khi kiểm proof terminal.
 
-**Lifeline:** Nhân viên kho → Frontend / inboundApi → WMS.API / ApiServiceProxy → InboundsController → SqlInboundRepository / ReceiptQueries → InventoryDB → ReceivingOrderClient → ReceivingOrdersController → SqlReceivingReservationRepository → ProcurementDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Nhân viên kho → Frontend / inboundApi → WMS.API / ApiServiceProxy → InboundsController → InboundRepository / ReceiptQueries → InventoryDB → ReceivingOrderClient → ReceivingOrdersController → ReceivingReservationRepository → ProcurementDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -476,14 +476,14 @@ Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = W
 30. `pr → pd`: BEGIN; UPDATE ReceivingReservation='RELEASED'; Touch PO RowVersion; COMMIT.
 31. **ref SD07.LOAD**: Lấy ReceiptDetail mới.
 
-Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = WMS.API / ApiServiceProxy; `c` = InboundsController; `r` = SqlInboundRepository / ReceiptQueries; `d` = InventoryDB; `l` = ReceivingOrderClient; `pc` = ReceivingOrdersController; `pr` = SqlReceivingReservationRepository; `pd` = ProcurementDB.
+Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = WMS.API / ApiServiceProxy; `c` = InboundsController; `r` = InboundRepository / ReceiptQueries; `d` = InventoryDB; `l` = ReceivingOrderClient; `pc` = ReceivingOrdersController; `pr` = ReceivingReservationRepository; `pd` = ProcurementDB.
 
 **Ghi chú nghiệp vụ:**
 
 - Retry complete khi đã DONE / cancel khi đã CANCELLED: bỏ qua mutation; vẫn thực hiện RELEASE và LOAD. Khi chưa terminal, chạy phần bên dưới.
 - Inventory đã commit trước HTTP release. Release lỗi không rollback hàng đã nhận; retry dùng trạng thái terminal để tránh nhận lần hai. Lỗi nghiệp vụ=400/403/404/409; nguồn dữ liệu=503. Các transaction chưa commit sẽ rollback.
 
-**Nguồn code:** [Inventory.DAL/Inbound/SqlInboundRepository.cs](../Inventory.DAL/Inbound/SqlInboundRepository.cs), [Inventory.DAL/Receiving/ReceiptQueries.cs](../Inventory.DAL/Receiving/ReceiptQueries.cs), [Procurement.API/Controllers/ReceivingOrdersController.cs](../Procurement.API/Controllers/ReceivingOrdersController.cs), [Procurement.DAL/Receiving/SqlReceivingReservationRepository.cs](../Procurement.DAL/Receiving/SqlReceivingReservationRepository.cs).
+**Nguồn code:** [Inventory.DAL/Inbound/InboundRepository.cs](../Inventory.DAL/Inbound/InboundRepository.cs), [Inventory.DAL/Receiving/ReceiptQueries.cs](../Inventory.DAL/Receiving/ReceiptQueries.cs), [Procurement.API/Controllers/ReceivingOrdersController.cs](../Procurement.API/Controllers/ReceivingOrdersController.cs), [Procurement.DAL/Receiving/ReceivingReservationRepository.cs](../Procurement.DAL/Receiving/ReceivingReservationRepository.cs).
 
 ### SD10 — Tra cứu serial và gợi ý vị trí Putaway
 
@@ -493,7 +493,7 @@ Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = W
 
 **Hậu điều kiện:** Serial + candidates hợp lệ/không hợp lệ và lý do; không ghi vị trí hoặc giữ chỗ.
 
-**Lifeline:** Nhân viên kho → Frontend / putawayApi → WMS.API / ApiServiceProxy → PutawayController → PutawayService → SqlPutawayRepository → PutawayRules / CurrentSchemaPutawayGuard → SQL Server / InventoryDB / CatalogDB / WarehouseDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Nhân viên kho → Frontend / putawayApi → WMS.API / ApiServiceProxy → PutawayController → PutawayService → PutawayRepository → PutawayRules / CurrentSchemaPutawayGuard → SQL Server / InventoryDB / CatalogDB / WarehouseDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -515,14 +515,14 @@ Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / inboundApi; `g` = W
 16. `r → d`: Occupants(warehouse, location=null); JOIN CatalogDB để tính kích thước / tải trọng.
 17. `r → b`: Suggest(item, snapshot, occupants).
 
-Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / putawayApi; `g` = WMS.API / ApiServiceProxy; `c` = PutawayController; `s` = PutawayService; `r` = SqlPutawayRepository; `b` = PutawayRules / CurrentSchemaPutawayGuard; `d` = SQL Server / InventoryDB / CatalogDB / WarehouseDB.
+Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / putawayApi; `g` = WMS.API / ApiServiceProxy; `c` = PutawayController; `s` = PutawayService; `r` = PutawayRepository; `b` = PutawayRules / CurrentSchemaPutawayGuard; `d` = SQL Server / InventoryDB / CatalogDB / WarehouseDB.
 
 **Ghi chú nghiệp vụ:**
 
 - SQL cross-database trên cùng instance, không gọi Catalog.API/Warehouse.API. locked=true dùng transaction và HOLDLOCK/UPDLOCK; SD11 tự đọc Occupants sau kiểm version/guard.
 - Serial hợp lệ: ở kho được giao, IN_WAREHOUSE, chưa có location; nguồn PURCHASE phải có Inbound DONE. Schema claim/stocktake chưa tích hợp → 503. Gợi ý chưa giữ chỗ; SD11 kiểm lại khi ghi.
 
-**Nguồn code:** [Inventory.API/Controllers/PutawayController.cs](../Inventory.API/Controllers/PutawayController.cs), [Inventory.BLL/Putaway/PutawayService.cs](../Inventory.BLL/Putaway/PutawayService.cs), [Inventory.BLL/Putaway/PutawayRules.cs](../Inventory.BLL/Putaway/PutawayRules.cs), [Inventory.DAL/Putaway/SqlPutawayRepository.cs](../Inventory.DAL/Putaway/SqlPutawayRepository.cs).
+**Nguồn code:** [Inventory.API/Controllers/PutawayController.cs](../Inventory.API/Controllers/PutawayController.cs), [Inventory.BLL/Putaway/PutawayService.cs](../Inventory.BLL/Putaway/PutawayService.cs), [Inventory.BLL/Putaway/PutawayRules.cs](../Inventory.BLL/Putaway/PutawayRules.cs), [Inventory.DAL/Putaway/PutawayRepository.cs](../Inventory.DAL/Putaway/PutawayRepository.cs).
 
 ### SD11 — Xác nhận Putaway
 
@@ -532,7 +532,7 @@ Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / putawayApi; `g` = W
 
 **Hậu điều kiện:** Cập nhật location + movement + audit nguyên tử; lỗi trước commit rollback.
 
-**Lifeline:** Nhân viên kho → Frontend / putawayApi → WMS.API / ApiServiceProxy → PutawayController → PutawayService → SqlPutawayRepository → PutawayRules / OperationGuard → SQL Server / InventoryDB / CatalogDB / WarehouseDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Nhân viên kho → Frontend / putawayApi → WMS.API / ApiServiceProxy → PutawayController → PutawayService → PutawayRepository → PutawayRules / OperationGuard → SQL Server / InventoryDB / CatalogDB / WarehouseDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -558,13 +558,13 @@ Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / putawayApi; `g` = W
 20. `r → d`: UPDATE SerialItem.CurrentLocationID WHERE location NULL + đúng kho/state + RowVersion.
 21. `r → d`: INSERT SerialMovement(EventType=PUTAWAY); INSERT AuditLog(PUTAWAY_COMPLETED); COMMIT.
 
-Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / putawayApi; `g` = WMS.API / ApiServiceProxy; `c` = PutawayController; `s` = PutawayService; `r` = SqlPutawayRepository; `b` = PutawayRules / OperationGuard; `d` = SQL Server / InventoryDB / CatalogDB / WarehouseDB.
+Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / putawayApi; `g` = WMS.API / ApiServiceProxy; `c` = PutawayController; `s` = PutawayService; `r` = PutawayRepository; `b` = PutawayRules / OperationGuard; `d` = SQL Server / InventoryDB / CatalogDB / WarehouseDB.
 
 **Ghi chú nghiệp vụ:**
 
 - SD10 là tiền điều kiện, không bắt buộc gọi lại suggestions khi bấm Confirm. Mọi lỗi trước commit rollback cả UPDATE/movement/audit. Putaway không cộng tồn kho lần nữa.
 
-**Nguồn code:** [Inventory.BLL/Putaway/PutawayService.cs](../Inventory.BLL/Putaway/PutawayService.cs), [Inventory.DAL/Putaway/SqlPutawayRepository.cs](../Inventory.DAL/Putaway/SqlPutawayRepository.cs).
+**Nguồn code:** [Inventory.BLL/Putaway/PutawayService.cs](../Inventory.BLL/Putaway/PutawayService.cs), [Inventory.DAL/Putaway/PutawayRepository.cs](../Inventory.DAL/Putaway/PutawayRepository.cs).
 
 ### SD12 — Xem danh sách và chi tiết Audit Log
 
@@ -574,7 +574,7 @@ Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / putawayApi; `g` = W
 
 **Hậu điều kiện:** Danh sách audit tổng hợp hoặc chi tiết đã sanitize; lỗi nguồn trả 503.
 
-**Lifeline:** Admin → Frontend / auditApi → WMS.API / AdminAuditController → AuditGateway → AuditLogsController / Inventory hoặc Procurement → SqlAuditReader → Database nguồn / InventoryDB hoặc ProcurementDB → Identity.API + DAL / AuthController / SqlUserRepository → IdentityDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
+**Lifeline:** Admin → Frontend / auditApi → WMS.API / AdminAuditController → AuditGateway → AuditLogsController / Inventory hoặc Procurement → SqlAuditReader → Database nguồn / InventoryDB hoặc ProcurementDB → Identity.API + DAL / AuthController / UserRepository → IdentityDB. Đây là danh sách thành phần, không khẳng định mọi lời gọi đi tuyến tính theo danh sách.
 
 **Luồng chính và điểm tái sử dụng:**
 
@@ -604,7 +604,7 @@ Ký hiệu lifeline: `u` = Nhân viên kho; `f` = Frontend / putawayApi; `g` = W
 24. **ref SD12.EMPLOYEES**: Bổ sung actor name nếu thiếu.
 25. `g` xử lý: FillActor; Redact(OldValues, NewValues).
 
-Ký hiệu lifeline: `u` = Admin; `f` = Frontend / auditApi; `c` = WMS.API / AdminAuditController; `g` = AuditGateway; `a` = AuditLogsController / Inventory hoặc Procurement; `r` = SqlAuditReader; `d` = Database nguồn / InventoryDB hoặc ProcurementDB; `i` = Identity.API + DAL / AuthController / SqlUserRepository; `idb` = IdentityDB.
+Ký hiệu lifeline: `u` = Admin; `f` = Frontend / auditApi; `c` = WMS.API / AdminAuditController; `g` = AuditGateway; `a` = AuditLogsController / Inventory hoặc Procurement; `r` = SqlAuditReader; `d` = Database nguồn / InventoryDB hoặc ProcurementDB; `i` = Identity.API + DAL / AuthController / UserRepository; `idb` = IdentityDB.
 
 **Ghi chú nghiệp vụ:**
 

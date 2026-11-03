@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Identity.BLL.Authentication;
 
-public sealed record LoginResult(AuthUser? User, string? Error, bool Forbidden = false);
-
 public sealed class LoginService(IUserRepository users, PasswordService passwords)
 {
     private static readonly string DummyHash = new PasswordService().Hash(Guid.NewGuid().ToString());

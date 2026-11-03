@@ -12,11 +12,6 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace Identity.API.Controllers;
 
-public sealed record LoginRequest(
-    [Required, StringLength(100)] string Username,
-    [Required, StringLength(1024)] string Password,
-    bool RememberMe);
-
 [ApiController]
 [Route("api/auth")]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]

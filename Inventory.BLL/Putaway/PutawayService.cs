@@ -2,34 +2,6 @@ using Inventory.Models.Putaway;
 
 namespace Inventory.BLL.Putaway;
 
-public interface IPutawayRepository
-{
-    Task<PutawayPendingPage> PendingAsync(PutawayActor actor, string? search, int page, int pageSize, CancellationToken ct);
-    Task<PutawaySerial> FindAsync(PutawayActor actor, long? id, string? serial, CancellationToken ct);
-    Task<PutawaySuggestions> SuggestionsAsync(PutawayActor actor, long id, CancellationToken ct);
-    Task<PutawayResult> ConfirmAsync(PutawayActor actor, ConfirmPutaway request, CancellationToken ct);
-}
-
-/// <summary>Extension point for future stocktake/claim controls. Invoke again inside the write transaction.</summary>
-public interface IPutawayOperationGuard
-{
-    Task ValidateAsync(PutawaySerial serial, PutawayWarehouseSnapshot warehouse, CancellationToken ct);
-}
-
-public sealed class CurrentSchemaPutawayGuard : IPutawayOperationGuard
-{
-    public Task ValidateAsync(PutawaySerial serial, PutawayWarehouseSnapshot warehouse, CancellationToken ct)
-    {
-        ct.ThrowIfCancellationRequested();
-        // The final rental day and pre-existing awaiting goods have no agreed policy yet.
-        // Never silently authorize putaway into an expired or incompletely configured rented warehouse.
-        var today = DateTime.UtcNow.AddHours(7).Date;
-        if (warehouse.WarehouseType == "RENTED" && (warehouse.RentalEndDate is null || warehouse.RentalEndDate.Value.Date <= today))
-            throw new PutawayException(409, "RENTAL_POLICY_REQUIRED", "Kho thuê đã đến/hết hạn hoặc thiếu hạn thuê. Cần xác nhận chính sách trước khi Putaway.");
-        return Task.CompletedTask;
-    }
-}
-
 public sealed class PutawayService(IPutawayRepository repository)
 {
     public Task<PutawayPendingPage> PendingAsync(PutawayActor actor, string? search, int page, int pageSize, CancellationToken ct)

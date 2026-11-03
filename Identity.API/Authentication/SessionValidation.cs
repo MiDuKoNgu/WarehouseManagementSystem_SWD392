@@ -5,9 +5,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Identity.API.Authentication;
 
-[AttributeUsage(AttributeTargets.Method)]
-public sealed class SkipUserLookupAttribute : Attribute { }
-
 public sealed class SessionValidation(IUserRepository users) : CookieAuthenticationEvents
 {
     public override Task RedirectToLogin(RedirectContext<CookieAuthenticationOptions> context)

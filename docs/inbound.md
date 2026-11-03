@@ -134,9 +134,9 @@ Suite có lỗi nguồn tồn tại từ trước: `tests/Catalog.Products.Tests
 ## Tham chiếu mã nguồn
 
 - `Inventory.Models/Inbound/InboundContracts.cs`, `Inventory.BLL/Inbound/InboundRules.cs`.
-- `Inventory.DAL/Inbound/SqlInboundRepository.cs`, `Inventory.DAL/Receiving/ReceiptQueries.cs`.
+- `Inventory.DAL/Inbound/InboundRepository.cs`, `Inventory.DAL/Receiving/ReceiptQueries.cs`.
 - `Inventory.API/Controllers/InboundsController.cs`, `Inventory.API/Clients/ReceivingOrderClient.cs`.
-- `Procurement.API/Controllers/ReceivingOrdersController.cs`, `Procurement.DAL/Receiving/SqlReceivingReservationRepository.cs`.
+- `Procurement.API/Controllers/ReceivingOrdersController.cs`, `Procurement.DAL/Receiving/ReceivingReservationRepository.cs`.
 - `frontend/src/features/inbound/`, `tests/Inventory.Inbound.Tests/`.
 
 

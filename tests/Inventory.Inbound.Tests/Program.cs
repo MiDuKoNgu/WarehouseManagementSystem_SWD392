@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Inventory.Inbound.Tests;
 
-internal static class InboundTests
+internal static partial class InboundTests
 {
     public static async Task Main()
     {
@@ -115,28 +115,4 @@ internal static class InboundTests
         try{await client.FindAsync(1,default);throw new Exception("Expected owner service conflict");}
         catch(ReceiptException error){Check(error.StatusCode==409&&error.Message=="PO closed","owner conflict preserved");}
     }
-    private sealed class IdentityHandler:HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken ct)
-        {
-            if(request.RequestUri!.AbsolutePath.EndsWith("validate-csrf"))return Task.FromResult(new HttpResponseMessage(
-                request.Headers.TryGetValues("X-CSRF-TOKEN",out var values)&&values.Single()=="valid"?HttpStatusCode.NoContent:HttpStatusCode.BadRequest));
-            var cookie=request.Headers.GetValues("Cookie").Single();
-            var role=cookie.Contains("admin")?"ADMIN":cookie.Contains("buyer")?"PURCHASING_STAFF":"WAREHOUSE_STAFF";
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK){Content=JsonContent.Create(new
-                {userId=22,username="warehouse",fullName="Warehouse Test",role,warehouseId=cookie.Contains("unassigned")?(int?)null:1})});
-        }
-    }
-    private sealed class ProcurementHandler:HttpMessageHandler
-    {
-        public bool Fail;public string? Cookie;public string? Csrf;
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken ct)
-        {
-            Cookie=request.Headers.GetValues("Cookie").Single();Csrf=request.Headers.GetValues("X-CSRF-TOKEN").Single();
-            return Task.FromResult(Fail?new HttpResponseMessage(HttpStatusCode.Conflict){Content=JsonContent.Create(new{message="PO closed"})}:
-                request.Method==HttpMethod.Post?new(HttpStatusCode.NoContent):new(HttpStatusCode.OK){Content=JsonContent.Create(Order())});
-        }
-    }
-    private sealed class ClientFactory(HttpMessageHandler handler):IHttpClientFactory
-    {public HttpClient CreateClient(string name)=>new(handler,false);}
 }

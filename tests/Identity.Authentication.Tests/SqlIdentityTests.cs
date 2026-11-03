@@ -8,7 +8,7 @@ using System.Data.Common;
 
 namespace Identity.Authentication.Tests;
 
-internal static class SqlIdentityTests
+internal static partial class SqlIdentityTests
 {
     public static async Task Run()
     {
@@ -16,7 +16,7 @@ internal static class SqlIdentityTests
         var queryOptions = new DbContextOptionsBuilder<IdentityDbContext>()
             .UseSqlServer("Server=unused;Database=IdentityModelOnly;Integrated Security=true;TrustServerCertificate=true")
             .AddInterceptors(new TranslationProbe()).Options;
-        var queryRepository = new SqlUserRepository(new ProbeContextFactory(queryOptions));
+        var queryRepository = new UserRepository(new ProbeContextFactory(queryOptions));
         await CheckTranslation(() => queryRepository.FindByUsernameAsync("translation-probe", default));
         await CheckTranslation(() => queryRepository.FindByIdAsync(1, default));
         using (var model = IdentityDbContext.Create("Server=unused;Database=IdentityModelOnly;Integrated Security=true;TrustServerCertificate=true"))
@@ -41,7 +41,7 @@ internal static class SqlIdentityTests
             var entity = new User { Username = "ef-test", FullName = "EF Test", PasswordHash = "first", Role = role };
             db.Users.Add(entity);
             await db.SaveChangesAsync();
-            var repository = new SqlUserRepository(connection);
+            var repository = new UserRepository(connection);
             var initial = await repository.FindByUsernameAsync(entity.Username, default);
             Check(initial is { Role: "ADMIN", PasswordHash: "first" } && initial.RowVersion.Length == 8, "user and role DTO projection");
             await repository.UpdatePasswordHashAsync(initial!, "second", default);
@@ -64,17 +64,5 @@ internal static class SqlIdentityTests
         try { await query(); }
         catch (TranslationCompleteException) { return; }
         throw new Exception("FAIL: expected SQL connection probe.");
-    }
-
-    private sealed class TranslationCompleteException : Exception { }
-    private sealed class TranslationProbe : DbConnectionInterceptor
-    {
-        public override ValueTask<InterceptionResult> ConnectionOpeningAsync(
-            DbConnection connection, ConnectionEventData eventData, InterceptionResult result,
-            CancellationToken cancellationToken = default) => throw new TranslationCompleteException();
-    }
-    private sealed class ProbeContextFactory(DbContextOptions<IdentityDbContext> options) : IDbContextFactory<IdentityDbContext>
-    {
-        public IdentityDbContext CreateDbContext() => new(options);
     }
 }

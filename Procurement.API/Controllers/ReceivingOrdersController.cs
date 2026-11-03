@@ -39,7 +39,7 @@ public sealed class ReceivingOrdersController(IPurchaseOrderRepository orders, I
 
     [HttpPost("{id:long:min(1)}/reserve"), ValidateSessionCsrf]
     public async Task<IActionResult> Reserve(long id, ReceivingReservationRequest request,
-        [FromServices] SqlReceivingReservationRepository reservations, CancellationToken ct)
+        [FromServices] ReceivingReservationRepository reservations, CancellationToken ct)
     {
         if (WarehouseId is not { } warehouse) return Forbid();
         await reservations.ReserveAsync(id, request.Token, warehouse,
@@ -49,7 +49,7 @@ public sealed class ReceivingOrdersController(IPurchaseOrderRepository orders, I
 
     [HttpPost("{id:long:min(1)}/release"), ValidateSessionCsrf]
     public async Task<IActionResult> Release(long id, ReceivingReservationRequest request,
-        [FromServices] SqlReceivingReservationRepository reservations, CancellationToken ct)
+        [FromServices] ReceivingReservationRepository reservations, CancellationToken ct)
     {
         if (WarehouseId is not { } warehouse) return Forbid();
         if (request.Token == Guid.Empty) return BadRequest(new { message = "Mã yêu cầu không hợp lệ." });

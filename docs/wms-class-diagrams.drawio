@@ -68,7 +68,7 @@
         <mxCell id="22" value="+ FindByUsernameAsync(username, …): Task&lt;AuthUser?&gt; + FindByIdAsync(id, …): Task&lt;AuthUser?&gt; + ListDisplayNamesAsync(…): Task&lt;UserDisplay[]&gt; + UpdatePasswordHashAsync(user, hash, …): Task" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="20">
           <mxGeometry x="0" y="104" width="470" height="112" as="geometry" />
         </mxCell>
-        <mxCell id="23" value="«Identity.DAL.Repositories» SqlUserRepository" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
+        <mxCell id="23" value="«Identity.DAL.Repositories» UserRepository" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
           <mxGeometry x="1950" y="800" width="470" height="263" as="geometry" />
         </mxCell>
         <mxCell id="24" value="- _connectionString: string - const SelectUser: string" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;" vertex="1" parent="23">
@@ -241,7 +241,7 @@
         <mxCell id="8" value="«Inventory.API.Controllers» InboundsController" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#e0e7ff;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
           <mxGeometry x="1320" y="230" width="470" height="309" as="geometry" />
         </mxCell>
-        <mxCell id="9" value="receipts: SqlInboundRepository [DI] orders: ReceivingOrderClient [DI] policy: ReceiptPolicy; queries: ReceiptQueries [DI] - Actor: ReceiptActor" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;" vertex="1" parent="8">
+        <mxCell id="9" value="receipts: InboundRepository [DI] orders: ReceivingOrderClient [DI] policy: ReceiptPolicy; queries: ReceiptQueries [DI] - Actor: ReceiptActor" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;" vertex="1" parent="8">
           <mxGeometry x="0" y="62" width="470" height="112" as="geometry" />
         </mxCell>
         <mxCell id="10" value="+ List / Orders / Order / Detail: Task&lt;IActionResult&gt; + Create(request: CreateReceipt, …): Task&lt;IActionResult&gt; + Add / Update / Remove: Task&lt;IActionResult&gt; + Complete / Cancel: Task&lt;IActionResult&gt; - Load(id, …): Task&lt;ReceiptDetail&gt;" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="8">
@@ -265,7 +265,7 @@
         <mxCell id="16" value="+ {static} Validate(value, policy, today): SaveReceiptItem + {static} Version(version: string?): void + {static} Today(): DateOnly" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="14">
           <mxGeometry x="0" y="104" width="470" height="89" as="geometry" />
         </mxCell>
-        <mxCell id="17" value="«Inventory.DAL.Inbound» SqlInboundRepository" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
+        <mxCell id="17" value="«Inventory.DAL.Inbound» InboundRepository" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
           <mxGeometry x="690" y="800" width="470" height="332" as="geometry" />
         </mxCell>
         <mxCell id="18" value="connectionString: string [constructor] policy: ReceiptPolicy [constructor DI]" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;" vertex="1" parent="17">
@@ -289,7 +289,7 @@
         <mxCell id="24" value="orders: IPurchaseOrderRepository [DI] lookup: IPurchaseOrderLookup [DI]" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;" vertex="1" parent="23">
           <mxGeometry x="0" y="62" width="470" height="66" as="geometry" />
         </mxCell>
-        <mxCell id="25" value="+ List / Detail: Task&lt;IActionResult&gt; + Reserve / Release: Task&lt;IActionResult&gt; Reserve/Release inject SqlReceivingReservationRepository" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="23">
+        <mxCell id="25" value="+ List / Detail: Task&lt;IActionResult&gt; + Reserve / Release: Task&lt;IActionResult&gt; Reserve/Release inject ReceivingReservationRepository" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="23">
           <mxGeometry x="0" y="128" width="470" height="89" as="geometry" />
         </mxCell>
         <mxCell id="26" value="«record · Inventory.Models.Inbound»&#xA;CreateReceipt" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#f3e8ff;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
@@ -319,7 +319,7 @@
         <mxCell id="34" value="—" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="32">
           <mxGeometry x="0" y="174" width="470" height="42" as="geometry" />
         </mxCell>
-        <mxCell id="35" value="«Procurement.DAL.Receiving» SqlReceivingReservationRepository" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
+        <mxCell id="35" value="«Procurement.DAL.Receiving» ReceivingReservationRepository" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
           <mxGeometry x="1950" y="1370" width="470" height="171" as="geometry" />
         </mxCell>
         <mxCell id="36" value="connectionString: string [constructor]" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;" vertex="1" parent="35">
@@ -361,7 +361,7 @@
         <mxCell id="48" value="dbo.PurchaseOrder dbo.PurchaseOrderLine dbo.ReceivingReservation" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;" vertex="1" parent="47">
           <mxGeometry x="0" y="62" width="470" height="89" as="geometry" />
         </mxCell>
-        <mxCell id="49" value="SqlPurchaseOrderRepository: đọc PO SqlReceivingReservationRepository: reserve/release" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="47">
+        <mxCell id="49" value="PurchaseOrderRepository: đọc PO ReceivingReservationRepository: reserve/release" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="47">
           <mxGeometry x="0" y="151" width="470" height="66" as="geometry" />
         </mxCell>
         <mxCell id="50" value="«record · Inventory.Models.Inbound» ReceiptItem" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#f3e8ff;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
@@ -615,7 +615,7 @@
         <mxCell id="28" value="Ghi InventoryDB trong transaction Đọc/khóa profile và cấu hình cross-database" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="26">
           <mxGeometry x="0" y="151" width="470" height="66" as="geometry" />
         </mxCell>
-        <mxCell id="29" value="«Inventory.DAL.Putaway» SqlPutawayRepository" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
+        <mxCell id="29" value="«Inventory.DAL.Putaway» PutawayRepository" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
           <mxGeometry x="690" y="1370" width="470" height="309" as="geometry" />
         </mxCell>
         <mxCell id="30" value="- connectionString: string - catalog: string; warehouse: string - guard: IPutawayOperationGuard" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;" vertex="1" parent="29">
@@ -866,7 +866,7 @@
         <mxCell id="12" value="AuditUsers yêu cầu role ADMIN" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;" vertex="1" parent="11">
           <mxGeometry x="0" y="62" width="470" height="43" as="geometry" />
         </mxCell>
-        <mxCell id="13" value="+ AuditUsers(users: IUserRepository, …): Task&lt;IActionResult&gt; → SqlUserRepository.ListDisplayNamesAsync → IdentityDB.User" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="11">
+        <mxCell id="13" value="+ AuditUsers(users: IUserRepository, …): Task&lt;IActionResult&gt; → UserRepository.ListDisplayNamesAsync → IdentityDB.User" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;overflow=hidden;strokeColor=#cbd5e1;" vertex="1" parent="11">
           <mxGeometry x="0" y="105" width="470" height="89" as="geometry" />
         </mxCell>
         <mxCell id="14" value="«controller» Inventory.API.Controllers.AuditLogsController" style="swimlane;startSize=62;horizontal=1;rounded=0;fillColor=#e0e7ff;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontColor=#0f172a;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
@@ -1138,7 +1138,7 @@
         <mxCell id="16" value="Xác thực cookie qua Identity.API /api/auth/me CSRF qua Identity.API /api/auth/validate-csrf" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="15">
           <mxGeometry x="0" y="62" width="470" height="66" as="geometry" />
         </mxCell>
-        <mxCell id="17" value="Identity → SqlUserRepository → IdentityDB.User + Role" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;strokeColor=#cbd5e1;" vertex="1" parent="15">
+        <mxCell id="17" value="Identity → UserRepository → IdentityDB.User + Role" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;strokeColor=#cbd5e1;" vertex="1" parent="15">
           <mxGeometry x="0" y="128" width="470" height="43" as="geometry" />
         </mxCell>
         <mxCell id="18" value="B. Điều phối nghiệp vụ và abstraction" style="text;align=left;fontSize=18;fontStyle=1;fontFamily=Arial;fontColor=#334155;" vertex="1" parent="1">
@@ -1192,7 +1192,7 @@
         <mxCell id="34" value="+ GetOptionsAsync(…): Task&lt;PurchaseOrderOptions&gt; + GetCreatorNameAsync(userId, …): Task&lt;string?&gt; + GetReceivingSummaryAsync(poId, …): Task&lt;ReceivingSummary&gt; - GetAsync&lt;T&gt;(service, fallback, path, …): Task&lt;T&gt;" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;strokeColor=#cbd5e1;" vertex="1" parent="32">
           <mxGeometry x="0" y="151" width="470" height="112" as="geometry" />
         </mxCell>
-        <mxCell id="35" value="«Procurement.DAL.PurchaseOrders» SqlPurchaseOrderRepository" style="swimlane;startSize=62;rounded=0;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
+        <mxCell id="35" value="«Procurement.DAL.PurchaseOrders» PurchaseOrderRepository" style="swimlane;startSize=62;rounded=0;fillColor=#ffedd5;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
           <mxGeometry x="690" y="1385" width="470" height="263" as="geometry" />
         </mxCell>
         <mxCell id="36" value="connectionString: string [constructor] - const SelectSql: string" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="35">
@@ -1225,7 +1225,7 @@
         <mxCell id="45" value="«service context» Các nguồn lookup" style="swimlane;startSize=62;rounded=0;fillColor=#f1f5f9;swimlaneFillColor=#ffffff;strokeColor=#64748b;fontSize=15;fontStyle=1;fontFamily=Arial;whiteSpace=wrap;collapsible=0;" vertex="1" parent="1">
           <mxGeometry x="60" y="1955" width="470" height="217" as="geometry" />
         </mxCell>
-        <mxCell id="46" value="CatalogOptionsController → CatalogLookupRepository → CatalogDB WarehouseOptionsController → WarehouseLookupRepository → WarehouseDB AuthController → SqlUserRepository → IdentityDB ReceivingSummaryController → ReceivingSummaryRepository → InventoryDB" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="45">
+        <mxCell id="46" value="CatalogOptionsController → CatalogRepository → CatalogDB WarehouseOptionsController → WarehouseRepository → WarehouseDB AuthController → UserRepository → IdentityDB ReceivingSummaryController → ReceivingSummaryRepository → InventoryDB" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="45">
           <mxGeometry x="0" y="62" width="470" height="112" as="geometry" />
         </mxCell>
         <mxCell id="47" value="HTTP cùng cookie; Catalog + Warehouse gọi song song" style="text;align=left;verticalAlign=top;spacing=10;fontSize=13;fontFamily=Arial;whiteSpace=wrap;strokeColor=#cbd5e1;" vertex="1" parent="45">
@@ -1528,7 +1528,7 @@
         <mxCell id="146" value="Rows [0..*]" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jettySize=25;endArrow=open;endFill=0;dashed=0;strokeColor=#475569;strokeWidth=1.4;fontSize=12;fontFamily=Arial;labelBackgroundColor=#ffffff;whiteSpace=wrap;labelWidth=190;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="106" target="67">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="147" value="Nguồn: PurchaseOrdersController.cs; PurchaseOrderService.cs (gồm ImportPreviewStore); Contracts.cs; SqlPurchaseOrderRepository.cs; PurchaseOrderLookupClient.cs; Procurement.Models/PurchaseOrders; PurchaseOrderWorkbook.cs. Thành viên không liên quan và framework ControllerBase được lược bỏ." style="text;align=left;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="147" value="Nguồn: PurchaseOrdersController.cs; PurchaseOrderService.cs (gồm ImportPreviewStore); Contracts.cs; PurchaseOrderRepository.cs; PurchaseOrderLookupClient.cs; Procurement.Models/PurchaseOrders; PurchaseOrderWorkbook.cs. Thành viên không liên quan và framework ControllerBase được lược bỏ." style="text;align=left;fontSize=13;fontFamily=Arial;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="40" y="5125" width="2500" height="60" as="geometry" />
         </mxCell>
       </root>

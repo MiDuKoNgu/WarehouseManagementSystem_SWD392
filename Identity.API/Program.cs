@@ -18,7 +18,7 @@ builder.Services.AddDbContextFactory<IdentityDbContext>(options => options.UseSq
     IdentityDbContext.ConfigureConnection(builder.Configuration.GetConnectionString("Identity")
     ?? builder.Configuration["EWMS_IDENTITY_CONNECTION"]
     ?? throw new InvalidOperationException("Identity database connection is not configured.")), sql => sql.CommandTimeout(5)));
-builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<SessionValidation>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {

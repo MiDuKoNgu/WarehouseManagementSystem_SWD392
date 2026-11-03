@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace WMS.Audit.Source.Tests;
 
-internal static class QueryCompilationTests
+internal static partial class QueryCompilationTests
 {
     public static async Task Run()
     {
@@ -26,16 +26,5 @@ internal static class QueryCompilationTests
         try { await query(); }
         catch (QueryCompiledException) { return; }
         throw new Exception("FAIL: expected connection probe after SQL compilation.");
-    }
-    private sealed class QueryCompiledException : Exception { }
-    private sealed class ConnectionProbe : DbConnectionInterceptor
-    {
-        public override ValueTask<InterceptionResult> ConnectionOpeningAsync(
-            DbConnection connection, ConnectionEventData eventData, InterceptionResult result,
-            CancellationToken cancellationToken = default) => throw new QueryCompiledException();
-    }
-    private sealed class ContextFactory(DbContextOptions<AuditDbContext> options) : IDbContextFactory<AuditDbContext>
-    {
-        public AuditDbContext CreateDbContext() => new(options);
     }
 }

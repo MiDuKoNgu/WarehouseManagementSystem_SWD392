@@ -53,7 +53,7 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Xử lý trong code:** `UserRoles.IsSupported`.
 
-**Nguồn đối chiếu:** [Identity.Models/Authentication/AuthUser.cs](../Identity.Models/Authentication/AuthUser.cs), [Identity.DAL/Repositories/SqlUserRepository.cs](../Identity.DAL/Repositories/SqlUserRepository.cs).
+**Nguồn đối chiếu:** [Identity.Models/Authentication/AuthUser.cs](../Identity.Models/Authentication/AuthUser.cs), [Identity.DAL/Repositories/UserRepository.cs](../Identity.DAL/Repositories/UserRepository.cs).
 
 ## CS03 — User
 
@@ -70,7 +70,7 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Xử lý trong code:** `LoginService.LoginAsync / AccessError; PasswordService.Verify`.
 
-**Nguồn đối chiếu:** [Identity.Models/Authentication/AuthUser.cs](../Identity.Models/Authentication/AuthUser.cs), [Identity.DAL/Repositories/SqlUserRepository.cs](../Identity.DAL/Repositories/SqlUserRepository.cs), [Identity.Seed/Program.cs](../Identity.Seed/Program.cs).
+**Nguồn đối chiếu:** [Identity.Models/Authentication/AuthUser.cs](../Identity.Models/Authentication/AuthUser.cs), [Identity.DAL/Repositories/UserRepository.cs](../Identity.DAL/Repositories/UserRepository.cs), [Identity.Seed/Program.cs](../Identity.Seed/Program.cs).
 
 ## CS04 — Supplier
 
@@ -87,7 +87,7 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Xử lý trong code:** `PurchaseOrderService.Validate`.
 
-**Nguồn đối chiếu:** [Catalog.DAL/Repositories/CatalogLookupRepository.cs](../Catalog.DAL/Repositories/CatalogLookupRepository.cs), [scripts/sql/seed-po-catalog.sql](../scripts/sql/seed-po-catalog.sql).
+**Nguồn đối chiếu:** [Catalog.DAL/Repositories/CatalogRepository.cs](../Catalog.DAL/Repositories/CatalogRepository.cs), [scripts/sql/seed-po-catalog.sql](../scripts/sql/seed-po-catalog.sql).
 
 ## CS05 — PurchaseOrder
 
@@ -104,7 +104,7 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Xử lý trong code:** `PurchaseOrderService.CreateAsync / UpdateAsync / ConfirmOrderAsync / CancelAsync / CloseAsync`.
 
-**Nguồn đối chiếu:** [Procurement.Models/PurchaseOrders/PurchaseOrderContracts.cs](../Procurement.Models/PurchaseOrders/PurchaseOrderContracts.cs), [Procurement.DAL/PurchaseOrders/SqlPurchaseOrderRepository.cs](../Procurement.DAL/PurchaseOrders/SqlPurchaseOrderRepository.cs).
+**Nguồn đối chiếu:** [Procurement.Models/PurchaseOrders/PurchaseOrderContracts.cs](../Procurement.Models/PurchaseOrders/PurchaseOrderContracts.cs), [Procurement.DAL/PurchaseOrders/PurchaseOrderRepository.cs](../Procurement.DAL/PurchaseOrders/PurchaseOrderRepository.cs).
 
 ## CS06 — PurchaseOrderLine
 
@@ -121,7 +121,7 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Xử lý trong code:** `PurchaseOrderService.Validate / CloseAsync; repository.TransitionAsync`.
 
-**Nguồn đối chiếu:** [Procurement.DAL/PurchaseOrders/SqlPurchaseOrderRepository.cs](../Procurement.DAL/PurchaseOrders/SqlPurchaseOrderRepository.cs).
+**Nguồn đối chiếu:** [Procurement.DAL/PurchaseOrders/PurchaseOrderRepository.cs](../Procurement.DAL/PurchaseOrders/PurchaseOrderRepository.cs).
 
 ## CS07 — Product
 
@@ -138,7 +138,7 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Xử lý trong code:** `PurchaseOrderService.Validate; PutawayRules.Suggest / Evaluate`.
 
-**Nguồn đối chiếu:** [Catalog.Models/Products/ProductContracts.cs](../Catalog.Models/Products/ProductContracts.cs), [Inventory.DAL/Putaway/SqlPutawayRepository.cs](../Inventory.DAL/Putaway/SqlPutawayRepository.cs).
+**Nguồn đối chiếu:** [Catalog.Models/Products/ProductContracts.cs](../Catalog.Models/Products/ProductContracts.cs), [Inventory.DAL/Putaway/PutawayRepository.cs](../Inventory.DAL/Putaway/PutawayRepository.cs).
 
 ## CS08 — Inbound
 
@@ -153,9 +153,9 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Quan hệ và ràng buộc:** DRAFT có thể chưa có item; COMPLETE yêu cầu ít nhất một item hợp lệ. DONE tạo hàng chính thức; CANCELLED hủy hiệu lực item. CreationToken chống tạo trùng. WarehouseID nullable trong migration phục vụ dữ liệu cũ; phiếu mới phải đúng kho Actor.
 
-**Xử lý trong code:** `SqlInboundRepository.CreateAsync / CompleteAsync / CancelAsync`.
+**Xử lý trong code:** `InboundRepository.CreateAsync / CompleteAsync / CancelAsync`.
 
-**Nguồn đối chiếu:** [Inventory.Models/Inbound/InboundContracts.cs](../Inventory.Models/Inbound/InboundContracts.cs), [Inventory.DAL/Inbound/SqlInboundRepository.cs](../Inventory.DAL/Inbound/SqlInboundRepository.cs), [scripts/sql/migrate-inbound.sql](../scripts/sql/migrate-inbound.sql).
+**Nguồn đối chiếu:** [Inventory.Models/Inbound/InboundContracts.cs](../Inventory.Models/Inbound/InboundContracts.cs), [Inventory.DAL/Inbound/InboundRepository.cs](../Inventory.DAL/Inbound/InboundRepository.cs), [scripts/sql/migrate-inbound.sql](../scripts/sql/migrate-inbound.sql).
 
 ## CS09 — InboundItem
 
@@ -170,9 +170,9 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Quan hệ và ràng buộc:** Thuộc một Inbound và POLine. Serial không trùng serial thật hoặc item hoạt động khác. Trước complete, SerialItemID thường null; sau complete liên kết một SerialItem. Remove đặt IsActive=false, không xóa vật lý.
 
-**Xử lý trong code:** `InboundRules.Validate; SqlInboundRepository.SaveItemAsync / RemoveItemAsync`.
+**Xử lý trong code:** `InboundRules.Validate; InboundRepository.SaveItemAsync / RemoveItemAsync`.
 
-**Nguồn đối chiếu:** [Inventory.Models/Inbound/InboundContracts.cs](../Inventory.Models/Inbound/InboundContracts.cs), [Inventory.DAL/Inbound/SqlInboundRepository.cs](../Inventory.DAL/Inbound/SqlInboundRepository.cs).
+**Nguồn đối chiếu:** [Inventory.Models/Inbound/InboundContracts.cs](../Inventory.Models/Inbound/InboundContracts.cs), [Inventory.DAL/Inbound/InboundRepository.cs](../Inventory.DAL/Inbound/InboundRepository.cs).
 
 ## CS10 — SerialItem
 
@@ -187,9 +187,9 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Quan hệ và ràng buộc:** Thuộc một Product; serial nguồn PURCHASE cần Inbound DONE trước putaway. IN_WAREHOUSE và CurrentLocationID=null biểu diễn chờ putaway. Putaway chỉ đổi vị trí, không tạo thêm serial hoặc tăng tồn lần nữa.
 
-**Xử lý trong code:** `PutawayRules.ValidateSerial; SqlPutawayRepository.ConfirmAsync`.
+**Xử lý trong code:** `PutawayRules.ValidateSerial; PutawayRepository.ConfirmAsync`.
 
-**Nguồn đối chiếu:** [tests/Inventory.Inbound.Tests/Schema.sql](../tests/Inventory.Inbound.Tests/Schema.sql), [Inventory.DAL/Inbound/SqlInboundRepository.cs](../Inventory.DAL/Inbound/SqlInboundRepository.cs), [Inventory.DAL/Putaway/SqlPutawayRepository.cs](../Inventory.DAL/Putaway/SqlPutawayRepository.cs).
+**Nguồn đối chiếu:** [tests/Inventory.Inbound.Tests/Schema.sql](../tests/Inventory.Inbound.Tests/Schema.sql), [Inventory.DAL/Inbound/InboundRepository.cs](../Inventory.DAL/Inbound/InboundRepository.cs), [Inventory.DAL/Putaway/PutawayRepository.cs](../Inventory.DAL/Putaway/PutawayRepository.cs).
 
 ## CS11 — SerialMovement
 
@@ -204,9 +204,9 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Quan hệ và ràng buộc:** Thuộc một SerialItem và một User thực hiện. Inbound complete tạo PURCHASE_RECEIPT; putaway tạo PUTAWAY. Movement được ghi cùng transaction với thay đổi serial và audit.
 
-**Xử lý trong code:** `SqlInboundRepository.CompleteAsync; SqlPutawayRepository.ConfirmAsync`.
+**Xử lý trong code:** `InboundRepository.CompleteAsync; PutawayRepository.ConfirmAsync`.
 
-**Nguồn đối chiếu:** [tests/Inventory.Inbound.Tests/Schema.sql](../tests/Inventory.Inbound.Tests/Schema.sql), [Inventory.DAL/Putaway/SqlPutawayRepository.cs](../Inventory.DAL/Putaway/SqlPutawayRepository.cs).
+**Nguồn đối chiếu:** [tests/Inventory.Inbound.Tests/Schema.sql](../tests/Inventory.Inbound.Tests/Schema.sql), [Inventory.DAL/Putaway/PutawayRepository.cs](../Inventory.DAL/Putaway/PutawayRepository.cs).
 
 ## CS12 — StorageLocation
 
@@ -223,7 +223,7 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Xử lý trong code:** `PutawayRules.Evaluate / Suggest`.
 
-**Nguồn đối chiếu:** [Warehouse.Models/Lookups/PutawayLayout.cs](../Warehouse.Models/Lookups/PutawayLayout.cs), [Inventory.DAL/Putaway/SqlPutawayRepository.cs](../Inventory.DAL/Putaway/SqlPutawayRepository.cs).
+**Nguồn đối chiếu:** [Warehouse.Models/Lookups/PutawayLayout.cs](../Warehouse.Models/Lookups/PutawayLayout.cs), [Inventory.DAL/Putaway/PutawayRepository.cs](../Inventory.DAL/Putaway/PutawayRepository.cs).
 
 ## CS13 — ZoneStorageRule
 
@@ -240,7 +240,7 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Xử lý trong code:** `PutawayRules.Evaluate`.
 
-**Nguồn đối chiếu:** [Warehouse.Models/Lookups/PutawayLayout.cs](../Warehouse.Models/Lookups/PutawayLayout.cs), [Inventory.DAL/Putaway/SqlPutawayRepository.cs](../Inventory.DAL/Putaway/SqlPutawayRepository.cs).
+**Nguồn đối chiếu:** [Warehouse.Models/Lookups/PutawayLayout.cs](../Warehouse.Models/Lookups/PutawayLayout.cs), [Inventory.DAL/Putaway/PutawayRepository.cs](../Inventory.DAL/Putaway/PutawayRepository.cs).
 
 ## CS14 — Category
 
@@ -257,7 +257,7 @@ Tài liệu đi kèm [class diagram model gốc](wms-domain-class-diagrams.drawi
 
 **Xử lý trong code:** `PutawayRules.Evaluate`.
 
-**Nguồn đối chiếu:** [Catalog.Models/Products/ProductContracts.cs](../Catalog.Models/Products/ProductContracts.cs), [Inventory.DAL/Putaway/SqlPutawayRepository.cs](../Inventory.DAL/Putaway/SqlPutawayRepository.cs).
+**Nguồn đối chiếu:** [Catalog.Models/Products/ProductContracts.cs](../Catalog.Models/Products/ProductContracts.cs), [Inventory.DAL/Putaway/PutawayRepository.cs](../Inventory.DAL/Putaway/PutawayRepository.cs).
 
 ## CS15 — Brand
 

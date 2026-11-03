@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Inventory.Inbound.Tests;
 
-internal static class QueryTranslationTests
+internal static partial class QueryTranslationTests
 {
     public static async Task Run()
     {
@@ -15,7 +15,7 @@ internal static class QueryTranslationTests
             .UseSqlServer("Server=unused;Database=TranslationOnly;Integrated Security=true;TrustServerCertificate=true")
             .AddInterceptors(new ConnectionProbe()).Options;
         var factory = new ContextFactory(options);
-        var repository = new SqlInboundRepository(factory, InboundTests.Policy);
+        var repository = new InboundRepository(factory, InboundTests.Policy);
         var queries = new ReceiptQueries(factory);
         await Check(() => repository.ListAsync(InboundTests.Actor, default), "receipt list");
         await Check(() => repository.FindAsync(1, InboundTests.Actor, default), "receipt detail");
@@ -32,18 +32,5 @@ internal static class QueryTranslationTests
         try { await query(); }
         catch (TranslationCompleteException) { return; }
         throw new Exception("FAIL expected SQL connection probe: " + name);
-    }
-
-    private sealed class TranslationCompleteException : Exception { }
-    private sealed class ConnectionProbe : DbConnectionInterceptor
-    {
-        public override ValueTask<InterceptionResult> ConnectionOpeningAsync(
-            DbConnection connection, ConnectionEventData eventData, InterceptionResult result,
-            CancellationToken cancellationToken = default) => throw new TranslationCompleteException();
-    }
-
-    private sealed class ContextFactory(DbContextOptions<InventoryDbContext> options) : IDbContextFactory<InventoryDbContext>
-    {
-        public InventoryDbContext CreateDbContext() => new(options);
     }
 }
